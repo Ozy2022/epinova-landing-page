@@ -72,16 +72,15 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col items-start justify-center gap-4 border-t border-line py-10 md:border-l md:px-8 lg:border-t-0">
-            <p className="type-h3">Meet us at LEAP 2026.</p>
+            <p className="type-h3">{footer.ctaTitle}</p>
             <Button href="#contact" variant="outline">
-              Book a meeting
+              {footer.ctaLabel}
             </Button>
           </div>
         </div>
 
         <div className="flex flex-col gap-2 border-t border-line py-6 text-xs text-tertiary md:flex-row md:items-center md:justify-between">
           <p>{footer.copyright}</p>
-          <p>{footer.credits}</p>
           <a
             href={footer.privacyHref}
             className="transition-colors duration-200 hover:text-secondary"
