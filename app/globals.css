@@ -1,26 +1,202 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ */
+/* EpiNova design tokens — single source of truth (CLAUDE.md §6).      */
+/* Palette sampled from the logo. Never hard-code a hex in components. */
+/* Semantics: teal = biology · blue = AI · copper = human outcome.     */
+/* ------------------------------------------------------------------ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Biology — teal (left strand) */
+  --teal-300: #7fdcea;
+  --teal-400: #4fc8dc;
+  --teal-500: #2e9cb8;
+  --teal-600: #1b6e88;
+  --teal-700: #12505f;
+
+  /* Human health — copper (right strand). ACCENT ONLY, max ~5% of a viewport */
+  --copper-300: #efc0ac;
+  --copper-400: #e0a48f;
+  --copper-500: #c4877a;
+  --copper-600: #a66a5c;
+
+  /* Intelligence — blue (mid-journey only) */
+  --blue-500: #2e7dd4;
+  --blue-600: #1e4e8c;
+
+  /* Surfaces */
+  --navy-950: #050f17;
+  --navy-900: #0a1e29;
+  --navy-850: #0f2836;
+  --navy-800: #12303f;
+  --navy-700: #1b4254;
+
+  /* Light section (06 only) */
+  --light-bg: #f1f6f8;
+  --light-text: #0a1e29;
+
+  /* Text */
+  --text-primary: #eef5f7;
+  --text-secondary: #9fb8c4;
+  --text-tertiary: #5e7c8b;
+
+  /* Hairlines */
+  --line: rgba(238, 245, 247, 0.08);
+  --line-strong: rgba(238, 245, 247, 0.14);
+  --line-accent: rgba(46, 156, 184, 0.24);
+
+  /* Effects */
+  --glass: rgba(255, 255, 255, 0.04);
+  --glow-teal: 0 0 48px rgba(46, 156, 184, 0.22);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Type families (Cabinet Grotesk + Switzer arrive via Fontshare link;
+     JetBrains Mono via next/font as --font-jbm) */
+  --font-display: "Cabinet Grotesk", "Switzer", system-ui, sans-serif;
+  --font-body: "Switzer", system-ui, sans-serif;
+  --font-mono: var(--font-jbm, ui-monospace), "JetBrains Mono", monospace;
 }
 
+/* Tailwind v4 theme mapping — utilities reference tokens, not hexes */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-teal-300: var(--teal-300);
+  --color-teal-400: var(--teal-400);
+  --color-teal-500: var(--teal-500);
+  --color-teal-600: var(--teal-600);
+  --color-teal-700: var(--teal-700);
+
+  --color-copper-300: var(--copper-300);
+  --color-copper-400: var(--copper-400);
+  --color-copper-500: var(--copper-500);
+  --color-copper-600: var(--copper-600);
+
+  --color-blue-500: var(--blue-500);
+  --color-blue-600: var(--blue-600);
+
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-850: var(--navy-850);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+
+  --color-light-bg: var(--light-bg);
+  --color-light-text: var(--light-text);
+
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-line-accent: var(--line-accent);
+  --color-glass: var(--glass);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --shadow-glow-teal: var(--glow-teal);
+
+  --ease-brand: var(--ease);
+
+  --breakpoint-xs: 390px;
+  --breakpoint-3xl: 1600px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: clip; /* wide content scrolls in its own container, never the page */
+  background: var(--navy-950);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--teal-600);
+  color: var(--text-primary);
+}
+
+/* Section rhythm — owned by <Section>, never by individual sections */
+.section-pad {
+  padding-block: clamp(80px, 10vw, 160px);
+}
+
+/* Pipeline fill gradient runs vertical on mobile, horizontal on desktop */
+@media (min-width: 768px) {
+  [data-fill] {
+    --pipeline-angle: 90deg;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Type scale (CLAUDE.md §7)                                           */
+/* ------------------------------------------------------------------ */
+
+.type-display-xl {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3.25rem, 8vw, 7rem);
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.type-display-lg {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+
+.type-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.type-h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 1.3;
+}
+
+.type-body-lg {
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  line-height: 1.6;
+}
+
+.type-label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.type-stat {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(2.75rem, 6vw, 5rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }

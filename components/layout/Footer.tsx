@@ -1,0 +1,95 @@
+import { Logo } from "@/components/brand/Logo";
+import { Button } from "@/components/ui/Button";
+import { contact, footer, header } from "@/lib/content";
+
+/**
+ * Operator-style bordered grid: logo + descriptor · nav column · contact
+ * column · inline CTA cell, then a bottom row with copyright, illustration
+ * credits and privacy link (CLAUDE.md §11).
+ */
+export function Footer() {
+  return (
+    <footer className="border-t border-line">
+      <div className="mx-auto w-full max-w-360 px-6 md:px-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <div className="border-t border-line py-10 first:border-t-0 md:pr-8 md:[&:nth-child(2)]:border-t-0 lg:border-t-0">
+            <Logo />
+            <p className="mt-4 max-w-xs text-sm text-secondary">
+              {footer.descriptor}
+            </p>
+          </div>
+
+          <nav
+            aria-label="Footer"
+            className="border-t border-line py-10 md:border-l md:border-t-0 md:px-8"
+          >
+            <p className="type-label mb-4 text-tertiary">Navigate</p>
+            <ul className="space-y-3">
+              {header.nav.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="inline-block py-1 text-sm text-secondary transition-colors duration-200 hover:text-primary"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="border-t border-line py-10 md:px-8 lg:border-l lg:border-t-0">
+            <p className="type-label mb-4 text-tertiary">Contact</p>
+            <ul className="space-y-3 text-sm text-secondary">
+              <li>
+                <a
+                  href={`mailto:${contact.details.email}`}
+                  className="transition-colors duration-200 hover:text-primary"
+                >
+                  {contact.details.email}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`tel:${contact.details.phone.replace(/\s/g, "")}`}
+                  className="transition-colors duration-200 hover:text-primary"
+                >
+                  {contact.details.phone}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={contact.details.linkedin}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="transition-colors duration-200 hover:text-primary"
+                >
+                  LinkedIn
+                </a>
+              </li>
+              <li className="text-tertiary">{contact.details.booth}</li>
+            </ul>
+          </div>
+
+          <div className="flex flex-col items-start justify-center gap-4 border-t border-line py-10 md:border-l md:px-8 lg:border-t-0">
+            <p className="type-h3">Meet us at LEAP 2026.</p>
+            <Button href="#contact" variant="outline">
+              Book a meeting
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-line py-6 text-xs text-tertiary md:flex-row md:items-center md:justify-between">
+          <p>{footer.copyright}</p>
+          <p>{footer.credits}</p>
+          <a
+            href={footer.privacyHref}
+            className="transition-colors duration-200 hover:text-secondary"
+          >
+            {footer.privacyLabel}
+          </a>
+        </div>
+      </div>
+    </footer>
+  );
+}
