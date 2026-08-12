@@ -6,7 +6,8 @@ import { z } from "zod";
 import { Aurora } from "@/components/bits/Aurora";
 import { Container } from "@/components/layout/Container";
 import { MonoLabel } from "@/components/ui/MonoLabel";
-import { contact } from "@/lib/content";
+import { Reveal } from "@/components/ui/Reveal";
+import { closing, contact } from "@/lib/content";
 
 const schema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -24,12 +25,13 @@ type Status = "idle" | "sending" | "success" | "error";
 
 const inputClass =
   "w-full rounded border border-line bg-glass px-4 py-3 text-sm text-primary placeholder:text-tertiary " +
-  "transition-colors duration-200 focus:border-teal-500 focus:outline-none";
+  "backdrop-blur-md transition-colors duration-200 focus:border-teal-500 focus:outline-none";
 
 /**
- * 09 — CONTACT: navy-950 with the aurora background. Form left (validation,
- * inline errors, loading/success/error states, honeypot), bordered detail
- * grid right (CLAUDE.md §11).
+ * Act 6 closing + contact. The story returns to deep navy: the brand
+ * signature ("Early Detection. Lifelong Protection.") lands here — never
+ * in the hero — followed by the form (validation, inline errors, states,
+ * honeypot) and the glass detail cells.
  */
 export function Contact() {
   const [status, setStatus] = useState<Status>("idle");
@@ -85,10 +87,20 @@ export function Contact() {
       </div>
 
       <Container className="section-pad relative">
-        <MonoLabel text={contact.label} className="mb-6" />
-        <h2 className="type-h2 max-w-2xl">{contact.h2}</h2>
+        {/* the closing statement — the emotional landing of the story */}
+        <Reveal className="mb-24 flex flex-col items-center text-center md:mb-32">
+          <p className="type-display-lg" translate="no">
+            {closing.brand}
+          </p>
+          <p className="type-h3 mt-4 text-secondary">{closing.tagline}</p>
+          <p className="type-body-lg mt-8 max-w-xl text-tertiary">
+            {closing.cta}
+          </p>
+        </Reveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-12">
+        <MonoLabel text={contact.label} className="mb-6" />
+
+        <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-12">
           {/* form */}
           <form
             className="space-y-5 lg:col-span-7"
@@ -214,7 +226,7 @@ export function Contact() {
           </form>
 
           {/* details — bordered grid cells */}
-          <div className="grid grid-cols-1 content-start divide-y divide-line border border-line lg:col-span-5">
+          <div className="glass-card grid grid-cols-1 content-start divide-y divide-line lg:col-span-5">
             <a
               href={`mailto:${contact.details.email}`}
               className="p-6 text-sm text-secondary transition-colors duration-200 hover:text-primary"

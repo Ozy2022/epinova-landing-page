@@ -1,5 +1,15 @@
 # CLAUDE.md — EpiNova Landing Page
 
+> ⚠️ **REDESIGN v2 (2026-08-12):** the founder issued a new brief —
+> `_assets/redesign-brief-v2.md` — that supersedes §4–§11 where they conflict.
+> The site is now a cinematic scroll-driven story (particle logo disassembly →
+> convergence → Biology×Intelligence fusion → data-flow → Saudi light section →
+> roadmap → closing). **No dashboard section. No percentages or statistics
+> anywhere.** New palette: deep navy #071A2A · biotech teal #08708F · electric
+> cyan #16B8D4 · rose #C68F86 (human-impact accent only) · off-white #F3F7F8 ·
+> dark blue #0B3045. Everything else below (stack, bans, conventions, contact
+> details, claim discipline) still applies.
+
 ## 0. How to use this file
 Single source of truth. Read fully before writing code. If this conflicts with a
 general best practice, this file wins. Never invent product claims, statistics,

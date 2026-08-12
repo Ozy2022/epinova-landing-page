@@ -1,0 +1,418 @@
+/**
+ * Lightweight canvas-2D particle engine for the hero story (v2 brief):
+ * Act 1 — the official logo mark dissolves into drifting particles
+ *         (teal strand drifts left, rose strand drifts right, circuit
+ *         lines become faint light traces);
+ * Act 2 — scroll converges the particles into the EPINOVA wordmark.
+ *
+ * No dependencies. DPR capped at 1.5. Colours are read from the CSS
+ * design tokens at runtime — no hexes live here.
+ */
+
+interface Particle {
+  /** home position, normalised to the logo box */
+  hx: number;
+  hy: number;
+  /** scatter position, normalised to the canvas */
+  sx: number;
+  sy: number;
+  /** word target, normalised to the wordmark box */
+  wx: number;
+  wy: number;
+  sprite: number;
+  size: number;
+  phase: number;
+  speed: number;
+  ampX: number;
+  ampY: number;
+  /** per-particle stagger for the dissolve / convergence */
+  dDelay: number;
+  wDelay: number;
+}
+
+interface Trace {
+  /** circuit-like polyline, normalised to the canvas */
+  points: Array<[number, number]>;
+  alpha: number;
+}
+
+export interface ParticleFieldOptions {
+  canvas: HTMLCanvasElement;
+  logoSrc: string;
+  word: string;
+  fontFamily?: string;
+}
+
+const SPRITE_TOKENS = [
+  "--teal-400", // electric cyan
+  "--teal-300",
+  "--teal-600", // biotech teal (also used for dark circuit pixels)
+  "--copper-300",
+  "--copper-400", // rose — human health
+] as const;
+
+const smooth = (v: number) => {
+  const t = Math.min(1, Math.max(0, v));
+  return t * t * (3 - 2 * t);
+};
+
+export class ParticleField {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D | null;
+  private opts: Required<ParticleFieldOptions>;
+
+  private particles: Particle[] = [];
+  private traces: Trace[] = [];
+  private sprites: HTMLCanvasElement[] = [];
+  private traceColor = "rgba(22,184,212,1)";
+
+  /** wordmark aspect ratio (w/h) measured at sampling time */
+  private wordAspect = 4;
+  private logoAspect = 389 / 583;
+
+  /** 0 = assembled logo · 1 = dispersed field */
+  disperse = 0;
+  /** 0 = field · 1 = formed wordmark (scroll-scrubbed) */
+  converge = 0;
+
+  private cw = 0;
+  private ch = 0;
+  private raf = 0;
+  private running = false;
+  private destroyed = false;
+  private ro: ResizeObserver | null = null;
+  private t0 = 0;
+
+  constructor(options: ParticleFieldOptions) {
+    this.canvas = options.canvas;
+    this.ctx = options.canvas.getContext("2d");
+    this.opts = {
+      fontFamily: '"Cabinet Grotesk", "Switzer", system-ui, sans-serif',
+      ...options,
+    };
+  }
+
+  async init(): Promise<void> {
+    if (!this.ctx) return;
+    this.buildSprites();
+    this.resize();
+
+    const img = await this.loadImage(this.opts.logoSrc);
+    if (this.destroyed) return;
+
+    // wait for the display font so the wordmark samples correctly
+    try {
+      await document.fonts.load(`700 190px ${this.opts.fontFamily}`);
+    } catch {
+      /* fallback font is fine */
+    }
+    if (this.destroyed) return;
+
+    const homePts = this.sampleLogo(img, this.maxCount());
+    const wordPts = this.sampleWord(this.opts.word);
+
+    // shuffle word targets so convergence looks organic
+    for (let i = wordPts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [wordPts[i], wordPts[j]] = [wordPts[j], wordPts[i]];
+    }
+
+    this.particles = homePts.map((p, i) => {
+      const w = wordPts[i % Math.max(1, wordPts.length)] ?? { x: 0.5, y: 0.5 };
+      // teal strand drifts left, rose strand drifts right
+      const dir = p.warm ? 1 : -1;
+      const sx = Math.min(
+        0.97,
+        Math.max(0.03, 0.5 + dir * (0.06 + Math.random() * 0.42)),
+      );
+      const sy = 0.06 + Math.random() * 0.88;
+      return {
+        hx: p.x,
+        hy: p.y,
+        sx,
+        sy,
+        wx: w.x,
+        wy: w.y,
+        sprite: p.sprite,
+        size: 1.4 + Math.random() * 2.2,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.35 + Math.random() * 0.5,
+        ampX: 6 + Math.random() * 14,
+        ampY: 5 + Math.random() * 12,
+        dDelay: Math.random() * 0.35,
+        wDelay: Math.random() * 0.3,
+      };
+    });
+
+    this.buildTraces();
+
+    this.ro = new ResizeObserver(() => this.resize());
+    this.ro.observe(this.canvas);
+  }
+
+  /** Render exactly one frame (used for static poses). */
+  renderOnce(): void {
+    this.render(performance.now() / 1000);
+  }
+
+  start(): void {
+    if (this.running || this.destroyed) return;
+    this.running = true;
+    this.t0 = performance.now();
+    const loop = (now: number) => {
+      if (!this.running) return;
+      this.render(now / 1000);
+      this.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  }
+
+  stop(): void {
+    this.running = false;
+    cancelAnimationFrame(this.raf);
+  }
+
+  destroy(): void {
+    this.destroyed = true;
+    this.stop();
+    this.ro?.disconnect();
+    this.ctx?.clearRect(0, 0, this.cw, this.ch);
+  }
+
+  resize(): void {
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    this.cw = rect.width;
+    this.ch = rect.height;
+    this.canvas.width = Math.round(rect.width * dpr);
+    this.canvas.height = Math.round(rect.height * dpr);
+    this.ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!this.running && this.particles.length) this.renderOnce();
+  }
+
+  /* ------------------------------------------------------------------ */
+
+  private maxCount(): number {
+    const w = window.innerWidth;
+    if (w < 480) return 1100;
+    if (w < 1024) return 1700;
+    return 2600;
+  }
+
+  private loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = src;
+    });
+  }
+
+  private cssColor(token: string): string {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue(token)
+      .trim();
+    return v || "#16b8d4";
+  }
+
+  private buildSprites(): void {
+    this.traceColor = this.cssColor("--teal-400");
+    this.sprites = SPRITE_TOKENS.map((token) => {
+      const c = document.createElement("canvas");
+      c.width = c.height = 48;
+      const g = c.getContext("2d")!;
+      const color = this.cssColor(token);
+      const grad = g.createRadialGradient(24, 24, 0, 24, 24, 24);
+      grad.addColorStop(0, color);
+      grad.addColorStop(0.3, color);
+      grad.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 48, 48);
+      return c;
+    });
+  }
+
+  /** Sample the logo raster into normalised particle home points. */
+  private sampleLogo(
+    img: HTMLImageElement,
+    maxCount: number,
+  ): Array<{ x: number; y: number; warm: boolean; sprite: number }> {
+    this.logoAspect = img.width / img.height;
+    const SW = 150;
+    const SH = Math.round(SW / this.logoAspect);
+    const off = document.createElement("canvas");
+    off.width = SW;
+    off.height = SH;
+    const g = off.getContext("2d", { willReadFrequently: true })!;
+    g.drawImage(img, 0, 0, SW, SH);
+    const data = g.getImageData(0, 0, SW, SH).data;
+
+    const raw: Array<{ x: number; y: number; warm: boolean; sprite: number }> =
+      [];
+    const step = 2;
+    for (let y = 0; y < SH; y += step) {
+      for (let x = 0; x < SW; x += step) {
+        const i = (y * SW + x) * 4;
+        const a = data[i + 3];
+        if (a < 140) continue;
+        const r = data[i];
+        const gg = data[i + 1];
+        const b = data[i + 2];
+        const bright = (r + gg + b) / 3;
+        const warm = r > b + 8;
+        let sprite: number;
+        if (bright < 55) {
+          sprite = 2; // dark circuit pixels → dim biotech teal
+        } else if (warm) {
+          sprite = Math.random() < 0.5 ? 3 : 4;
+        } else {
+          const roll = Math.random();
+          sprite = roll < 0.55 ? 0 : roll < 0.8 ? 1 : 2;
+        }
+        raw.push({ x: x / SW, y: y / SH, warm, sprite });
+      }
+    }
+
+    if (raw.length <= maxCount) return raw;
+    const keep = maxCount / raw.length;
+    return raw.filter(() => Math.random() < keep);
+  }
+
+  /** Rasterise the wordmark and sample normalised target points. */
+  private sampleWord(word: string): Array<{ x: number; y: number }> {
+    const W = 1000;
+    const H = 240;
+    const off = document.createElement("canvas");
+    off.width = W;
+    off.height = H;
+    const g = off.getContext("2d", { willReadFrequently: true })!;
+    let fs = 185;
+    g.font = `700 ${fs}px ${this.opts.fontFamily}`;
+    const measured = g.measureText(word).width;
+    if (measured > W - 60) fs = Math.floor((fs * (W - 60)) / measured);
+    g.font = `700 ${fs}px ${this.opts.fontFamily}`;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillStyle = "#fff";
+    g.fillText(word, W / 2, H / 2);
+
+    const data = g.getImageData(0, 0, W, H).data;
+    const pts: Array<{ x: number; y: number }> = [];
+    const step = 3;
+    let minX = W;
+    let maxX = 0;
+    let minY = H;
+    let maxY = 0;
+    for (let y = 0; y < H; y += step) {
+      for (let x = 0; x < W; x += step) {
+        const a = data[(y * W + x) * 4 + 3];
+        if (a < 140) continue;
+        pts.push({ x, y });
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+    const bw = Math.max(1, maxX - minX);
+    const bh = Math.max(1, maxY - minY);
+    this.wordAspect = bw / bh;
+    return pts.map((p) => ({ x: (p.x - minX) / bw, y: (p.y - minY) / bh }));
+  }
+
+  /** Faint circuit-like L-traces that appear as the logo dissolves. */
+  private buildTraces(): void {
+    this.traces = [];
+    for (let i = 0; i < 12; i++) {
+      const x = Math.random();
+      const y = Math.random();
+      const len1 = 0.05 + Math.random() * 0.14;
+      const len2 = 0.04 + Math.random() * 0.1;
+      const horizFirst = Math.random() < 0.5;
+      const s1 = Math.random() < 0.5 ? -1 : 1;
+      const s2 = Math.random() < 0.5 ? -1 : 1;
+      const mid: [number, number] = horizFirst
+        ? [x + s1 * len1, y]
+        : [x, y + s1 * len1];
+      const end: [number, number] = horizFirst
+        ? [mid[0], mid[1] + s2 * len2]
+        : [mid[0] + s2 * len2, mid[1]];
+      this.traces.push({
+        points: [[x, y], mid, end],
+        alpha: 0.03 + Math.random() * 0.05,
+      });
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+
+  private render(t: number): void {
+    const ctx = this.ctx;
+    if (!ctx || this.cw === 0) return;
+    const { cw, ch } = this;
+    ctx.clearRect(0, 0, cw, ch);
+
+    const d = this.disperse;
+    const w = this.converge;
+
+    // logo box — centred, slightly above middle
+    const logoH = Math.min(ch * 0.42, 400);
+    const logoW = logoH * this.logoAspect;
+    const logoX = (cw - logoW) / 2;
+    const logoY = ch * 0.46 - logoH / 2;
+
+    // wordmark box — centred
+    const wordW = Math.min(cw * 0.86, 920);
+    const wordH = wordW / this.wordAspect;
+    const wordX = (cw - wordW) / 2;
+    const wordY = ch * 0.5 - wordH / 2;
+
+    // circuit traces fade in with the dissolve, out with convergence
+    const traceAlpha = smooth(d) * (1 - smooth(w));
+    if (traceAlpha > 0.01) {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = this.traceColor;
+      ctx.lineWidth = 1;
+      for (const tr of this.traces) {
+        ctx.globalAlpha = tr.alpha * traceAlpha;
+        ctx.beginPath();
+        ctx.moveTo(tr.points[0][0] * cw, tr.points[0][1] * ch);
+        for (let i = 1; i < tr.points.length; i++) {
+          ctx.lineTo(tr.points[i][0] * cw, tr.points[i][1] * ch);
+        }
+        ctx.stroke();
+      }
+    }
+
+    ctx.globalCompositeOperation = "lighter";
+    for (const p of this.particles) {
+      const ed = smooth((d - p.dDelay) / (1 - p.dDelay));
+      const ew = smooth((w - p.wDelay) / (1 - p.wDelay));
+
+      const driftX = Math.sin(t * p.speed + p.phase) * p.ampX;
+      const driftY = Math.cos(t * p.speed * 0.8 + p.phase) * p.ampY;
+
+      const homeX = logoX + p.hx * logoW;
+      const homeY = logoY + p.hy * logoH;
+      const fieldX = p.sx * cw + driftX;
+      const fieldY = p.sy * ch + driftY;
+      const wordPX = wordX + p.wx * wordW;
+      const wordPY = wordY + p.wy * wordH;
+
+      const baseX = homeX + (fieldX - homeX) * ed;
+      const baseY = homeY + (fieldY - homeY) * ed;
+      const x = baseX + (wordPX - baseX) * ew;
+      const y = baseY + (wordPY - baseY) * ew;
+
+      const twinkle = 0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
+      ctx.globalAlpha = Math.min(1, twinkle * (0.55 + 0.45 * ed));
+
+      const s = p.size * (1 + 0.25 * ed - 0.2 * ew);
+      const sprite = this.sprites[p.sprite];
+      ctx.drawImage(sprite, x - s, y - s, s * 2, s * 2);
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+  }
+}

@@ -1,53 +1,54 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/* EpiNova design tokens — single source of truth (CLAUDE.md §6).      */
-/* Palette sampled from the logo. Never hard-code a hex in components. */
-/* Semantics: teal = biology · blue = AI · copper = human outcome.     */
+/* EpiNova design tokens — v2 redesign brief palette.                  */
+/* Never hard-code a hex in components.                                */
+/* Semantics: teal = biology · cyan = AI · rose/copper = human health. */
 /* ------------------------------------------------------------------ */
 
 :root {
-  /* Biology — teal (left strand) */
-  --teal-300: #7fdcea;
-  --teal-400: #4fc8dc;
-  --teal-500: #2e9cb8;
-  --teal-600: #1b6e88;
-  --teal-700: #12505f;
+  /* Biology — biotech teal → electric cyan (400 is the Electric Cyan) */
+  --teal-300: #6fdcee;
+  --teal-400: #16b8d4;
+  --teal-500: #0e94b4;
+  --teal-600: #08708f;
+  --teal-700: #0a5570;
 
-  /* Human health — copper (right strand). ACCENT ONLY, max ~5% of a viewport */
-  --copper-300: #efc0ac;
-  --copper-400: #e0a48f;
-  --copper-500: #c4877a;
-  --copper-600: #a66a5c;
+  /* Human health — soft copper/rose. ACCENT ONLY, meaningful moments */
+  --copper-300: #e2b7ae;
+  --copper-400: #c68f86;
+  --copper-500: #b27a70;
+  --copper-600: #96625a;
 
-  /* Intelligence — blue (mid-journey only) */
-  --blue-500: #2e7dd4;
-  --blue-600: #1e4e8c;
+  /* Intelligence — electric cyan (alias of the AI highlight colour) */
+  --blue-500: #16b8d4;
+  --blue-600: #0f6e96;
 
-  /* Surfaces */
-  --navy-950: #050f17;
-  --navy-900: #0a1e29;
-  --navy-850: #0f2836;
-  --navy-800: #12303f;
-  --navy-700: #1b4254;
+  /* Surfaces — deep navy base, dark blue cards */
+  --navy-950: #071a2a;
+  --navy-900: #0b3045;
+  --navy-850: #0a2739;
+  --navy-800: #0d3a54;
+  --navy-700: #155070;
 
-  /* Light section (06 only) */
-  --light-bg: #f1f6f8;
-  --light-text: #0a1e29;
+  /* Light section (Act 5 only) */
+  --light-bg: #f3f7f8;
+  --light-text: #071a2a;
 
   /* Text */
-  --text-primary: #eef5f7;
-  --text-secondary: #9fb8c4;
-  --text-tertiary: #5e7c8b;
+  --text-primary: #f3f7f8;
+  --text-secondary: #a7c2ce;
+  --text-tertiary: #5f7e8e;
 
   /* Hairlines */
-  --line: rgba(238, 245, 247, 0.08);
-  --line-strong: rgba(238, 245, 247, 0.14);
-  --line-accent: rgba(46, 156, 184, 0.24);
+  --line: rgba(243, 247, 248, 0.08);
+  --line-strong: rgba(243, 247, 248, 0.14);
+  --line-accent: rgba(22, 184, 212, 0.28);
 
   /* Effects */
-  --glass: rgba(255, 255, 255, 0.04);
-  --glow-teal: 0 0 48px rgba(46, 156, 184, 0.22);
+  --glass: rgba(255, 255, 255, 0.05);
+  --glow-teal: 0 0 48px rgba(22, 184, 212, 0.25);
+  --glow-rose: 0 0 40px rgba(198, 143, 134, 0.3);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Type families (Cabinet Grotesk + Switzer arrive via Fontshare link;
@@ -96,6 +97,7 @@
   --font-mono: var(--font-mono);
 
   --shadow-glow-teal: var(--glow-teal);
+  --shadow-glow-rose: var(--glow-rose);
 
   --ease-brand: var(--ease);
 
@@ -138,11 +140,75 @@ body {
   padding-block: clamp(80px, 10vw, 160px);
 }
 
-/* Pipeline fill gradient runs vertical on mobile, horizontal on desktop */
-@media (min-width: 768px) {
-  [data-fill] {
-    --pipeline-angle: 90deg;
+/* Glassmorphism surface (v2 brief) — light transparency, subtle blur,
+   thin teal border, soft cyan glow on hover. No white cards. */
+.glass-card {
+  background: var(--glass);
+  border: 1px solid color-mix(in srgb, var(--teal-400) 18%, transparent);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    border-color 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
+}
+.glass-card:hover {
+  border-color: color-mix(in srgb, var(--teal-400) 38%, transparent);
+  box-shadow: 0 0 32px color-mix(in srgb, var(--teal-400) 16%, transparent);
+}
+
+/* Riyadh origin pulse on the Act-5 map */
+@keyframes map-pulse {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.75;
   }
+  80% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.map-pulse {
+  animation: map-pulse 2.8s var(--ease) infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-pulse {
+    animation: none;
+    opacity: 0.35;
+  }
+}
+
+/* Cyan halo for the fused logo mark (tokens only — no raw hexes) */
+.glow-mark {
+  filter: drop-shadow(
+    0 0 36px color-mix(in srgb, var(--teal-400) 35%, transparent)
+  );
+}
+
+/* Soft section washes — navy → teal → navy, never flat harsh colour */
+.bg-wash-teal {
+  background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in srgb, var(--teal-700) 24%, transparent),
+      transparent 62%
+    ),
+    var(--navy-950);
+}
+.bg-wash-deep {
+  background:
+    radial-gradient(
+      110% 80% at 50% 100%,
+      color-mix(in srgb, var(--navy-900) 70%, transparent),
+      transparent 60%
+    ),
+    var(--navy-950);
 }
 
 /* ------------------------------------------------------------------ */

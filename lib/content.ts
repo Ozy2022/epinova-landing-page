@@ -1,7 +1,8 @@
 /**
- * ALL site copy lives here as typed objects (CLAUDE.md §9, §11).
- * No hard-coded strings in JSX — this makes the Arabic version a drop-in.
- * Do not add claims that are not in CLAUDE.md §11.
+ * ALL site copy lives here as typed objects (CLAUDE.md §9).
+ * v2 redesign brief (_assets/redesign-brief-v2.md): the page is a scroll-driven
+ * story in six acts. No percentages, no statistics, no dashboard — anywhere.
+ * Do not add claims beyond this file.
  */
 
 export interface Cta {
@@ -18,263 +19,152 @@ export interface NavItem {
 export const header = {
   brand: "EpiNova",
   nav: [
-    { label: "Challenge", href: "#challenge" },
-    { label: "Process", href: "#process" },
-    { label: "Platform", href: "#platform" },
+    { label: "The Fusion", href: "#fusion" },
+    { label: "Data Flow", href: "#flow" },
     { label: "Vision", href: "#vision" },
     { label: "Roadmap", href: "#roadmap" },
   ] satisfies NavItem[],
-  cta: { label: "Request a Demo", href: "#contact", variant: "solid" } satisfies Cta,
+  cta: { label: "Meet Us at LEAP", href: "#contact", variant: "solid" } satisfies Cta,
 } as const;
 
+/* Act 1 — the logo disassembles · Act 2 — scroll convergence */
 export const hero = {
   id: "hero",
   label: "RIYADH, SAUDI ARABIA — PRECISION ONCOLOGY",
   h1: ["Detect Earlier.", "Understand Deeper."],
-  sub: "AI-powered precision diagnostics using DNA methylation biomarkers for a new era of early breast cancer detection.",
+  sub: "AI-powered precision diagnostics for a new era of cancer detection.",
   ctas: [
-    { label: "Request a Demo", href: "#contact", variant: "solid" },
-    { label: "Meet Us at LEAP 2026", href: "#contact", variant: "outline" },
+    { label: "Explore EpiNova", href: "#fusion", variant: "solid" },
+    { label: "Meet Us at LEAP", href: "#contact", variant: "outline" },
   ] satisfies Cta[],
-} as const;
-
-export interface ChallengeCell {
-  title: string;
-  body: string;
-}
-
-export interface Stat {
-  value: string;
-  /** numeric part used by the count-up; suffix rendered after */
-  number: number;
-  suffix: string;
-  caption: string;
-}
-
-export const challenge = {
-  id: "challenge",
-  label: "01 — THE CHALLENGE",
-  h2: "Why Early Detection Matters",
-  cells: [
-    {
-      title: "Late Detection",
-      body: "Cancer is frequently identified at advanced stages.",
-    },
-    {
-      title: "Limited Biomarkers",
-      body: "Current methods lack sensitivity and specificity.",
-    },
-    {
-      title: "Data Privacy",
-      body: "Genetic information raises real security concerns.",
-    },
-  ] satisfies ChallengeCell[],
-  stats: [
-    { value: "50%", number: 50, suffix: "%", caption: "detected at late stage" },
-    {
-      value: "80%",
-      number: 80,
-      suffix: "%",
-      caption: "projected increase in cases by 2028",
-    },
-    {
-      value: "5.7×",
-      number: 5.7,
-      suffix: "×",
-      caption: "higher treatment cost at late stage",
-    },
-    {
-      value: "75%",
-      number: 75,
-      suffix: "%",
-      caption: "most diagnosed cancer among women in the region",
-    },
-  ] satisfies Stat[],
-  citation: {
-    text: 'Almohanna et al., "A comprehensive epidemiological analysis of breast cancer in the Eastern Province of Saudi Arabia," Scientific Reports 15:20856 (2025).',
-    doi: "10.1038/s41598-025-05276-7",
-    href: "https://doi.org/10.1038/s41598-025-05276-7",
+  /** Act 2 — the wordmark that forms from the merged particles */
+  convergence: {
+    wordmark: "EPINOVA",
+    line: "Where biology becomes insight.",
   },
 } as const;
 
-export interface PipelineStep {
-  label: string;
-  /** icon key resolved by the section component */
-  icon: "sample" | "extraction" | "methylation" | "ai" | "report";
+/* Act 3 — Biology × Intelligence */
+export const fusion = {
+  id: "fusion",
+  label: "01 — THE FUSION",
+  left: {
+    title: "Biology",
+    words: ["DNA", "Biomarkers", "Molecular Signals"],
+  },
+  right: {
+    title: "Intelligence",
+    words: ["AI", "Analytics", "Clinical Insights"],
+  },
+  statement: "Biology meets Intelligence.",
+  substatement:
+    "EpiNova reads the body's earliest molecular signals and interprets them with AI.",
+} as const;
+
+/* Act 4 — how the data flows. Colour = meaning:
+   teal (biology) → cyan (AI) → rose (human health). */
+export interface FlowStage {
+  title: string;
+  body: string;
+  /** drives node colour: biology | ai | human */
+  tone: "biology" | "ai" | "human";
 }
 
-export const process = {
-  id: "process",
-  label: "02 — THE PROCESS",
-  h2: "Biology to Insight, in Five Steps",
-  steps: [
-    { label: "Blood Sample", icon: "sample" },
-    { label: "DNA Extraction", icon: "extraction" },
-    { label: "Methylation Analysis", icon: "methylation" },
-    { label: "AI Risk Assessment", icon: "ai" },
-    { label: "Clinical Report", icon: "report" },
-  ] satisfies PipelineStep[],
+export const flow = {
+  id: "flow",
+  label: "02 — HOW THE DATA FLOWS",
+  h2: "From Sample to Certainty",
+  stages: [
+    {
+      title: "Biological Data",
+      body: "A simple blood sample carries the body's molecular story.",
+      tone: "biology",
+    },
+    {
+      title: "Molecular Signals",
+      body: "Epigenetic patterns surface the earliest signs of change.",
+      tone: "biology",
+    },
+    {
+      title: "AI Analysis",
+      body: "Models read the signals and separate meaning from noise.",
+      tone: "ai",
+    },
+    {
+      title: "Clinically Actionable Insights",
+      body: "A clear result clinicians can act on — earlier.",
+      tone: "human",
+    },
+  ] satisfies FlowStage[],
 } as const;
 
-export interface Marker {
-  gene: string;
-  tag: string;
-}
-
-export const science = {
-  id: "science",
-  label: "03 — THE SCIENCE",
-  h2: "Reading the Signals Before Symptoms Appear",
-  body: "DNA methylation changes are among the earliest detectable molecular events in tumour development. EpiNova reads these epigenetic patterns from a blood sample and interprets them with AI.",
-  markers: [
-    { gene: "BRCA1", tag: "Hypermethylated" },
-    { gene: "RASSF1A", tag: "Hypermethylated" },
-    { gene: "GSTP1", tag: "Hypermethylated" },
-  ] satisfies Marker[],
-  points: [
-    "Detects molecular change before symptoms",
-    "AI-assisted interpretation",
-    "Designed for clinical workflow",
-  ],
-} as const;
-
-export const platform = {
-  id: "platform",
-  label: "04 — THE PLATFORM",
-  /** "Smarter" renders in --copper-400 */
-  h2Accent: "Smarter",
-  h2Rest: " Genomics.",
-  sub: "Faster Insights. Greater Confidence.",
-  line: "An AI-powered diagnostic platform for early breast cancer detection.",
-  callouts: ["AI-Generated Clinical Insights", "Methylation Marker Analysis"],
-  /** ⚠ metrics from the client mockup — not published until confirmed real,
-   *  or must be labelled "illustrative" (CLAUDE.md §11-05) */
-  illustrativeMetricsConfirmed: false,
-} as const;
-
-export interface VisionItem {
-  index: string;
+/* Act 5 — Building Saudi Biotechnology (the light section) */
+export interface Pillar {
   title: string;
   body: string;
 }
 
 export const vision = {
   id: "vision",
-  label: "05 — NATIONAL ALIGNMENT",
-  h2: "From Saudi Innovation to Global Impact",
-  intro:
-    "Our aim is to contribute to a healthier Saudi Arabia by turning biological data into actionable insight for earlier, more precise care.",
-  items: [
+  label: "03 — NATIONAL ALIGNMENT",
+  h2: "Building Saudi Biotechnology",
+  sub: "From Saudi innovation to global impact.",
+  pillars: [
     {
-      index: "01",
-      title: "Better Health",
-      body: "Supporting earlier detection and more informed clinical decisions.",
+      title: "Health",
+      body: "Improving early detection and precision healthcare.",
     },
     {
-      index: "02",
-      title: "Local Innovation",
-      body: "Building Saudi biotechnology and AI capability for healthcare.",
+      title: "Innovation",
+      body: "Advancing biotechnology through AI and molecular intelligence.",
     },
     {
-      index: "03",
-      title: "Global Impact",
-      body: "Designing solutions that scale from Saudi Arabia outward.",
+      title: "Impact",
+      body: "Building solutions from Saudi Arabia for the region and beyond.",
     },
-  ] satisfies VisionItem[],
-  ladder: [
-    "Biotechnology",
-    "Genomics",
-    "Precision Medicine",
-    "AI",
-    "Early Detection",
-  ],
-  close:
-    "EpiNova sits at the intersection of biotechnology, genomics and artificial intelligence.",
+  ] satisfies Pillar[],
+  mapCaption: "Saudi Arabia → MENA → Global",
   /** "Aligned with" — never "part of" / "endorsed by". No government logos. */
   footnote:
     "Aligned with Saudi Arabia's National Biotechnology Strategy and Vision 2030.",
 } as const;
 
-export interface ServeTile {
+/* Act 6 — the road ahead + closing */
+export interface RoadStage {
   title: string;
   body: string;
-  icon: "hospital" | "research" | "system" | "government";
 }
 
-export const serve = {
-  id: "serve",
-  label: "06 — WHO WE SERVE",
-  h2: "Built for Healthcare Systems",
-  tiles: [
-    {
-      title: "Hospitals & Labs",
-      body: "Integrate early detection into clinical workflows.",
-      icon: "hospital",
-    },
-    {
-      title: "Biotech & Research",
-      body: "Use the platform for epigenetic research.",
-      icon: "research",
-    },
-    {
-      title: "Health Systems",
-      body: "Implement population-level screening programmes.",
-      icon: "system",
-    },
-    {
-      title: "Government & Regulators",
-      body: "Develop policy that promotes early detection.",
-      icon: "government",
-    },
-  ] satisfies ServeTile[],
-} as const;
-
-export interface RoadmapNode {
-  title: string;
-  note?: string;
-  detail: string;
-}
-
-export const journey = {
+export const roadmap = {
   id: "roadmap",
-  label: "07 — ROADMAP",
+  label: "04 — THE ROAD AHEAD",
   h2: "Where We're Going",
-  nodes: [
-    {
-      title: "Today",
-      detail: "Retrospective pilot on 1,000 patient samples.",
-    },
+  stages: [
     {
       title: "Breast Cancer",
-      note: "primary focus",
-      detail: "Q2 2026 regulatory preparation · Q3 2026 pilot launch.",
+      body: "Our first focus — earlier detection where it matters most.",
     },
     {
-      title: "Multi-Cancer Detection",
-      detail: "Q3–Q4 2026 platform expansion.",
+      title: "Multi-Cancer",
+      body: "Extending the platform across cancer types.",
     },
     {
-      title: "Precision Oncology Platform",
-      detail: "Q1 2027 regional scaling.",
+      title: "Precision Oncology",
+      body: "A foundation for precision healthcare at scale.",
     },
-  ] satisfies RoadmapNode[],
-  traction: [
-    { value: "1,000", number: 1000, suffix: "", caption: "patient samples" },
-    {
-      value: "95%",
-      number: 95,
-      suffix: "%",
-      /** ⚠ the qualifier is mandatory — never render this stat without it */
-      caption: "detection accuracy (early-stage, retrospective pilot)",
-    },
-    { value: "30s", number: 30, suffix: "s", caption: "processing time" },
-  ] satisfies Stat[],
+  ] satisfies RoadStage[],
+} as const;
+
+export const closing = {
+  brand: "EpiNova",
+  /** reserved for the closing only — the brand signature, not the hero */
+  tagline: "Early Detection. Lifelong Protection.",
+  cta: "Let's build the future of precision healthcare.",
 } as const;
 
 export const contact = {
   id: "contact",
-  label: "08 — GET IN TOUCH",
-  h2: "Let's Transform Cancer Detection Together",
+  label: "05 — GET IN TOUCH",
   form: {
     fields: {
       name: "Name",
@@ -300,10 +190,10 @@ export const contact = {
 
 export const footer = {
   descriptor:
-    "AI-powered precision diagnostics for early breast cancer detection.",
+    "AI-powered precision diagnostics for a new era of cancer detection.",
+  ctaTitle: "Meet us at LEAP 2026.",
+  ctaLabel: "Book a meeting",
   copyright: "© EpiNova 2026",
-  credits:
-    "Illustrations: Servier (CC-BY 3.0) · SciDraw contributors (CC-BY).",
   privacyLabel: "Privacy",
   privacyHref: "/privacy",
 } as const;
