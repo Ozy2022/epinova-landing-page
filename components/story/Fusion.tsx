@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { gsap, initMotion, prefersReducedMotion } from "@/lib/motion";
 import { MonoLabel } from "@/components/ui/MonoLabel";
+import { VideoBackdrop } from "@/components/story/VideoBackdrop";
 import { fusion } from "@/lib/content";
 
 /**
@@ -111,7 +112,12 @@ export function Fusion() {
   if (reduced) {
     return (
       <section id={fusion.id} className="bg-wash-teal relative scroll-mt-16 border-t border-line">
-        <div className="mx-auto flex min-h-svh w-full max-w-300 flex-col items-center justify-center gap-14 px-6 py-28 md:px-10">
+        <VideoBackdrop
+          src="/video/dna-loop.mp4"
+          poster="/video/dna-poster.jpg"
+          className="opacity-20"
+        />
+        <div className="relative mx-auto flex min-h-svh w-full max-w-300 flex-col items-center justify-center gap-14 px-6 py-28 md:px-10">
           <MonoLabel text={fusion.label} />
           <div className="grid w-full grid-cols-2 gap-10 md:gap-24 [&>div]:!items-center [&>div]:!text-center">
             {columns}
@@ -141,8 +147,13 @@ export function Fusion() {
       className="relative h-[240vh] scroll-mt-16 border-t border-line"
     >
       <div className="bg-wash-teal sticky top-0 flex h-svh flex-col items-center justify-center overflow-hidden px-6">
+        <VideoBackdrop
+          src="/video/dna-loop.mp4"
+          poster="/video/dna-poster.jpg"
+          className="opacity-20"
+        />
         <MonoLabel text={fusion.label} className="absolute top-24" />
-        <div className="grid w-full max-w-4xl grid-cols-2 gap-12 md:gap-32">
+        <div className="relative grid w-full max-w-4xl grid-cols-2 gap-12 md:gap-32">
           {columns}
         </div>
         {mark}
