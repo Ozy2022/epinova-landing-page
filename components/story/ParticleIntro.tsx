@@ -45,15 +45,6 @@ export function ParticleIntro() {
     let killed = false;
     let safety: ReturnType<typeof setTimeout> | undefined;
 
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !document.hidden) field.start();
-      else field.stop();
-    });
-    const onVisibility = () => {
-      if (document.hidden) field.stop();
-      else field.start();
-    };
-
     const ctx = gsap.context(() => {
       // hero copy waits for the dissolve; wordmark waits for convergence
       gsap.set(heroEl, { autoAlpha: 0, y: 24 });
@@ -72,9 +63,9 @@ export function ParticleIntro() {
 
       field.init().then(() => {
         if (killed) return;
+        // no IntersectionObserver here — the field's own render loop
+        // rect-checks visibility, which WebKit can't misreport
         field.start();
-        io.observe(canvas);
-        document.addEventListener("visibilitychange", onVisibility);
 
         // Act 1 — hold the assembled mark, then dissolve
         gsap
@@ -119,8 +110,6 @@ export function ParticleIntro() {
     return () => {
       killed = true;
       clearTimeout(safety);
-      io.disconnect();
-      document.removeEventListener("visibilitychange", onVisibility);
       ctx.revert();
       field.destroy();
     };
