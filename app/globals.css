@@ -177,12 +177,7 @@ body {
   transform-origin: center;
   transform-box: fill-box;
 }
-@media (prefers-reduced-motion: reduce) {
-  .map-pulse {
-    animation: none;
-    opacity: 0.35;
-  }
-}
+/* no reduced-motion override: motion is forced on site-wide (lib/motion.ts) */
 
 /* Cyan halo for the fused logo mark (tokens only — no raw hexes) */
 .glow-mark {

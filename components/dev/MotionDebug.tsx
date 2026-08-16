@@ -46,13 +46,13 @@ export function MotionDebug() {
       const canvas = document.querySelector("#hero canvas");
       setInfo(
         [
-          `reduced-motion: ${rm ? "ON — site renders STATIC by design" : "off"}`,
+          `os reduce-motion: ${rm ? "on (OVERRIDDEN — motion forced)" : "off"}`,
           `pointer: ${coarse ? "coarse (phone/tablet)" : "fine (mouse)"}`,
           `viewport: ${innerWidth}x${innerHeight} @${devicePixelRatio}x`,
           `hero canvas: ${canvas ? "mounted" : "NOT MOUNTED"}`,
           `canvas repainting: ${changes}/${ticks} checks`,
           `videos mounted: ${document.querySelectorAll("video").length}`,
-          `build: v-motion-3`,
+          `build: v-motion-4-forced`,
         ].join("\n"),
       );
     }, 700);

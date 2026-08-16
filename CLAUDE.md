@@ -9,6 +9,11 @@
 > cyan #16B8D4 · rose #C68F86 (human-impact accent only) · off-white #F3F7F8 ·
 > dark blue #0B3045. Everything else below (stack, bans, conventions, contact
 > details, claim discipline) still applies.
+>
+> **2026-08-16:** founder decision — motion is forced ON site-wide, including
+> for visitors with OS-level reduced-motion enabled. The §8 reduced-motion
+> rule is suspended via `FORCE_MOTION` in `lib/motion.ts`; every animation
+> still has its static path behind that flag if this is ever reverted.
 
 ## 0. How to use this file
 Single source of truth. Read fully before writing code. If this conflicts with a
