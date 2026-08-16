@@ -23,20 +23,19 @@ interface NavigatorWithHints extends Navigator {
 }
 
 /**
- * Phones get the still poster instead of video. Two 720p decodes behind a
- * scroll-scrubbed scene is the wrong trade on a mid-range Android on
- * exhibition-hall wifi (CLAUDE.md §3) — and the texture reads the same.
+ * The helix clip IS "the DNA" to visitors, so it plays everywhere —
+ * phones included (founder decision; the earlier phones-get-a-poster
+ * optimisation read as the animation being broken). Muted 720p H.264 is
+ * hardware-decoded, so the real cost is bandwidth: only data-saver mode
+ * and 2g connections get the still.
  */
 function shouldPlayVideo(): boolean {
-  if (prefersReducedMotion()) return false;
-  if (window.matchMedia("(max-width: 900px)").matches) return false;
-  if (window.matchMedia("(pointer: coarse)").matches) return false;
+  if (prefersReducedMotion()) return false; // FORCE_MOTION makes this false
   const nav = navigator as NavigatorWithHints;
   if (nav.connection?.saveData) return false;
-  if (nav.connection?.effectiveType && /2g|3g/.test(nav.connection.effectiveType)) {
+  if (nav.connection?.effectiveType && /(^|-)2g$/.test(nav.connection.effectiveType)) {
     return false;
   }
-  if (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 2) return false;
   return true;
 }
 
@@ -72,6 +71,7 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
     let active = a;
     let standby = b;
     let swapTimer: ReturnType<typeof setTimeout> | undefined;
+    let retriedAfterGesture = false;
 
     // Visibility via rect polling, not IntersectionObserver — WebKit
     // misreports IO for content inside position:sticky (this wrapper lives
@@ -83,7 +83,23 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
     };
     let visible = isOnScreen();
 
-    const fail = () => setStill(true);
+    // iOS Low Power Mode rejects autoplay until the user touches the page.
+    // First rejection: arm a one-shot retry on the next gesture. Only a
+    // second rejection falls back to the still poster.
+    const fail = () => {
+      if (retriedAfterGesture) {
+        setStill(true);
+        return;
+      }
+      retriedAfterGesture = true;
+      const retry = () => {
+        window.removeEventListener("touchend", retry);
+        window.removeEventListener("pointerdown", retry);
+        sync();
+      };
+      window.addEventListener("touchend", retry, { once: true, passive: true });
+      window.addEventListener("pointerdown", retry, { once: true, passive: true });
+    };
 
     // crossfade: when the active copy nears its end, dissolve in the standby
     const onTime = (e: Event) => {
