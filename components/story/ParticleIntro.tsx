@@ -43,6 +43,7 @@ export function ParticleIntro() {
       word: hero.convergence.wordmark,
     });
     let killed = false;
+    let safety: ReturnType<typeof setTimeout> | undefined;
 
     const io = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && !document.hidden) field.start();
@@ -58,8 +59,16 @@ export function ParticleIntro() {
       gsap.set(heroEl, { autoAlpha: 0, y: 24 });
       gsap.set(wordEl, { autoAlpha: 0 });
 
-      const revealHero = () =>
+      let revealed = false;
+      const revealHero = () => {
+        if (revealed) return;
+        revealed = true;
         gsap.to(heroEl, { autoAlpha: 1, y: 0, duration: 0.7 });
+      };
+      // never leave the hero blank waiting on the canvas: if sampling the
+      // mark is slow (or the request is), show the copy and let the
+      // particles dissolve in behind it
+      safety = setTimeout(revealHero, 1600);
 
       field.init().then(() => {
         if (killed) return;
@@ -109,6 +118,7 @@ export function ParticleIntro() {
 
     return () => {
       killed = true;
+      clearTimeout(safety);
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
       ctx.revert();
