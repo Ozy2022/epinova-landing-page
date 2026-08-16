@@ -52,7 +52,8 @@ export function MotionDebug() {
           `hero canvas: ${canvas ? "mounted" : "NOT MOUNTED"}`,
           `canvas repainting: ${changes}/${ticks} checks`,
           `videos mounted: ${document.querySelectorAll("video").length}`,
-          `build: v-motion-4-forced`,
+          `videos playing: ${[...document.querySelectorAll("video")].filter((v) => !(v as HTMLVideoElement).paused).length}`,
+          `build: v-motion-5-video`,
         ].join("\n"),
       );
     }, 700);
