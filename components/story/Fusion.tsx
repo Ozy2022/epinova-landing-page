@@ -144,7 +144,7 @@ export function Fusion() {
     <section
       id={fusion.id}
       ref={wrapRef}
-      className="relative h-[240vh] scroll-mt-16 border-t border-line"
+      className="relative h-[180vh] scroll-mt-16 border-t border-line md:h-[240vh]"
     >
       <div className="bg-wash-teal sticky top-0 flex h-svh flex-col items-center justify-center overflow-hidden px-6">
         <VideoBackdrop

@@ -82,6 +82,9 @@ export class ParticleField {
   private destroyed = false;
   private ro: ResizeObserver | null = null;
   private t0 = 0;
+  /** phones/tablets: DPR 1, fewer particles, 30fps cap */
+  private lowPower = false;
+  private lastFrame = 0;
 
   constructor(options: ParticleFieldOptions) {
     this.canvas = options.canvas;
@@ -97,7 +100,15 @@ export class ParticleField {
     this.buildSprites();
     this.resize();
 
-    const img = await this.loadImage(this.opts.logoSrc);
+    // The mark drives the particle home positions, but the hero must never
+    // render an empty canvas if that request fails (exhibition-hall wifi) —
+    // fall back to a procedural helix instead.
+    let img: HTMLImageElement | null = null;
+    try {
+      img = await this.loadImage(this.opts.logoSrc);
+    } catch {
+      img = null;
+    }
     if (this.destroyed) return;
 
     // wait for the display font so the wordmark samples correctly
@@ -108,7 +119,9 @@ export class ParticleField {
     }
     if (this.destroyed) return;
 
-    const homePts = this.sampleLogo(img, this.maxCount());
+    const homePts = img
+      ? this.sampleLogo(img, this.maxCount())
+      : this.helixPoints(this.maxCount());
     const wordPts = this.sampleWord(this.opts.word);
 
     // shuffle word targets so convergence looks organic
@@ -161,7 +174,13 @@ export class ParticleField {
     this.t0 = performance.now();
     const loop = (now: number) => {
       if (!this.running) return;
-      this.render(now / 1000);
+      // 24fps on low-power devices — the drift is slow enough that the
+      // reduced frame rate is invisible, but it cuts canvas work by 60%
+      const minGap = this.lowPower ? 41 : 0;
+      if (now - this.lastFrame >= minGap) {
+        this.lastFrame = now;
+        this.render(now / 1000);
+      }
       this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
@@ -182,7 +201,11 @@ export class ParticleField {
   resize(): void {
     const rect = this.canvas.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    this.lowPower =
+      window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900;
+    const dpr = this.lowPower
+      ? 1
+      : Math.min(window.devicePixelRatio || 1, 1.5);
     this.cw = rect.width;
     this.ch = rect.height;
     this.canvas.width = Math.round(rect.width * dpr);
@@ -195,7 +218,8 @@ export class ParticleField {
 
   private maxCount(): number {
     const w = window.innerWidth;
-    if (w < 480) return 1100;
+    // density matters here: below ~700 the mark stops reading as the logo
+    if (this.lowPower) return w < 480 ? 750 : 1150;
     if (w < 1024) return 1700;
     return 2600;
   }
@@ -218,19 +242,74 @@ export class ParticleField {
 
   private buildSprites(): void {
     this.traceColor = this.cssColor("--teal-400");
+    // Particles draw at ~3-7px, so a 16px sprite is already oversampled.
+    // A larger source would make every drawImage pay for a steep downscale.
+    const S = 16;
+    const r = S / 2;
     this.sprites = SPRITE_TOKENS.map((token) => {
       const c = document.createElement("canvas");
-      c.width = c.height = 48;
+      c.width = c.height = S;
       const g = c.getContext("2d")!;
       const color = this.cssColor(token);
-      const grad = g.createRadialGradient(24, 24, 0, 24, 24, 24);
+      const grad = g.createRadialGradient(r, r, 0, r, r, r);
       grad.addColorStop(0, color);
       grad.addColorStop(0.3, color);
       grad.addColorStop(1, "rgba(0,0,0,0)");
       g.fillStyle = grad;
-      g.fillRect(0, 0, 48, 48);
+      g.fillRect(0, 0, S, S);
       return c;
     });
+  }
+
+  /**
+   * Fallback home points: a two-strand helix with rungs, drawn from the same
+   * palette as the mark. Used only when the logo raster can't be fetched.
+   */
+  private helixPoints(
+    count: number,
+  ): Array<{ x: number; y: number; warm: boolean; sprite: number }> {
+    this.logoAspect = 389 / 583;
+    const pts: Array<{ x: number; y: number; warm: boolean; sprite: number }> =
+      [];
+    const turns = 3;
+    const strandTotal = Math.floor(count * 0.8);
+
+    for (let i = 0; i < strandTotal; i++) {
+      const t = i / strandTotal;
+      const warm = i % 2 === 1;
+      const a = t * Math.PI * 2 * turns + (warm ? Math.PI : 0);
+      pts.push({
+        x: 0.5 + 0.4 * Math.sin(a),
+        y: 0.04 + t * 0.92,
+        warm,
+        sprite: warm
+          ? Math.random() < 0.5
+            ? 3
+            : 4
+          : Math.random() < 0.7
+            ? 0
+            : 1,
+      });
+    }
+
+    const rungCount = 16;
+    const perRung = Math.max(2, Math.floor((count - strandTotal) / rungCount));
+    for (let r = 0; r < rungCount; r++) {
+      const t = (r + 0.5) / rungCount;
+      const a = t * Math.PI * 2 * turns;
+      const x1 = 0.5 + 0.4 * Math.sin(a);
+      const x2 = 0.5 + 0.4 * Math.sin(a + Math.PI);
+      for (let k = 0; k < perRung; k++) {
+        const f = k / Math.max(1, perRung - 1);
+        pts.push({
+          x: x1 + (x2 - x1) * f,
+          y: 0.04 + t * 0.92,
+          warm: f > 0.5,
+          sprite: 2,
+        });
+      }
+    }
+    return pts;
   }
 
   /** Sample the logo raster into normalised particle home points. */
