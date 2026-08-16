@@ -67,9 +67,9 @@ export function ParticleIntro() {
         // rect-checks visibility, which WebKit can't misreport
         field.start();
 
-        // Act 1 — hold the assembled mark, then dissolve
+        // Act 1 — hold the assembled, gently swaying mark, then dissolve
         gsap
-          .timeline({ delay: 0.6 })
+          .timeline({ delay: 1.1 })
           .to(field, {
             disperse: 1,
             duration: 1.8,

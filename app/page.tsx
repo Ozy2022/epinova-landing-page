@@ -7,6 +7,7 @@ import { DataFlow } from "@/components/story/DataFlow";
 import { SaudiVision } from "@/components/story/SaudiVision";
 import { Roadmap } from "@/components/story/Roadmap";
 import { Contact } from "@/components/sections/Contact";
+import { MotionDebug } from "@/components/dev/MotionDebug";
 
 /**
  * One page, one story (v2 brief): the logo disassembles → scroll
@@ -30,6 +31,7 @@ export default function Home() {
       </main>
 
       <Footer />
+      <MotionDebug />
     </>
   );
 }

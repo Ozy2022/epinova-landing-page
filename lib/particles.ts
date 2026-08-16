@@ -480,11 +480,12 @@ export class ParticleField {
     const d = this.disperse;
     const w = this.converge;
 
-    // logo box — centred, slightly above middle
+    // logo box — centred, slightly above middle, with a slow breathing
+    // sway so the assembled pose clearly reads as alive, never frozen
     const logoH = Math.min(ch * 0.42, 400);
     const logoW = logoH * this.logoAspect;
-    const logoX = (cw - logoW) / 2;
-    const logoY = ch * 0.46 - logoH / 2;
+    const logoX = (cw - logoW) / 2 + Math.sin(t * 0.6) * 5;
+    const logoY = ch * 0.46 - logoH / 2 + Math.sin(t * 0.9 + 1.3) * 7;
 
     // wordmark box — centred
     const wordW = Math.min(cw * 0.86, 920);
@@ -530,8 +531,10 @@ export class ParticleField {
 
       const baseX = homeX + (fieldX - homeX) * ed;
       const baseY = homeY + (fieldY - homeY) * ed;
-      const x = baseX + (wordPX - baseX) * ew;
-      const y = baseY + (wordPY - baseY) * ew;
+      // the formed wordmark keeps a faint shimmer so it never dies flat
+      const settle = Math.sin(t * p.speed * 0.7 + p.phase) * 1.8 * ew;
+      const x = baseX + (wordPX - baseX) * ew + settle;
+      const y = baseY + (wordPY - baseY) * ew - settle * 0.6;
 
       const s = p.size * (1 + 0.25 * ed - 0.2 * ew);
       // drifted off-screen — skip the draw entirely
