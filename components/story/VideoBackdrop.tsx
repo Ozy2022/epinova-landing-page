@@ -71,8 +71,17 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
 
     let active = a;
     let standby = b;
-    let visible = false;
     let swapTimer: ReturnType<typeof setTimeout> | undefined;
+
+    // Visibility via rect polling, not IntersectionObserver — WebKit
+    // misreports IO for content inside position:sticky (this wrapper lives
+    // inside the Fusion sticky scene), which would freeze/never-start the
+    // clip in Safari. One rect read every 300ms is negligible.
+    const isOnScreen = () => {
+      const r = wrap.getBoundingClientRect();
+      return r.width > 0 && r.bottom > 0 && r.top < window.innerHeight;
+    };
+    let visible = isOnScreen();
 
     const fail = () => setStill(true);
 
@@ -101,21 +110,24 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
         b.pause();
       }
     };
-    const io = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      sync();
-    });
+    const poll = setInterval(() => {
+      const v = isOnScreen();
+      if (v !== visible) {
+        visible = v;
+        sync();
+      }
+    }, 300);
 
     a.addEventListener("timeupdate", onTime);
     b.addEventListener("timeupdate", onTime);
-    io.observe(wrap);
+    sync();
     document.addEventListener("visibilitychange", sync);
 
     return () => {
       clearTimeout(swapTimer);
+      clearInterval(poll);
       a.removeEventListener("timeupdate", onTime);
       b.removeEventListener("timeupdate", onTime);
-      io.disconnect();
       document.removeEventListener("visibilitychange", sync);
       a.pause();
       b.pause();

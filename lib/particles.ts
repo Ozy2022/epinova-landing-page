@@ -85,6 +85,9 @@ export class ParticleField {
   /** phones/tablets: reduced DPR, fewer particles, 24fps cap */
   private lowPower = false;
   private lastFrame = 0;
+  /** self-managed visibility — see the note in start() */
+  private onScreen = true;
+  private lastVisCheck = 0;
   /** how many particles are actually drawn — trimmed if frames run long */
   private activeCount = 0;
   /** exponential moving average of render cost, ms */
@@ -116,9 +119,13 @@ export class ParticleField {
     }
     if (this.destroyed) return;
 
-    // wait for the display font so the wordmark samples correctly
+    // wait for the display font so the wordmark samples correctly — but
+    // never hang on it (Safari has been flaky about resolving fonts.load)
     try {
-      await document.fonts.load(`700 190px ${this.opts.fontFamily}`);
+      await Promise.race([
+        document.fonts.load(`700 190px ${this.opts.fontFamily}`),
+        new Promise((res) => setTimeout(res, 1500)),
+      ]);
     } catch {
       /* fallback font is fine */
     }
@@ -192,10 +199,24 @@ export class ParticleField {
     this.t0 = performance.now();
     const loop = (now: number) => {
       if (!this.running) return;
+
+      // Visibility is checked here with a rect test, NOT with
+      // IntersectionObserver: WebKit misreports IO entries for content
+      // inside position:sticky during compositor scrolls, which froze the
+      // field on iPhones. A getBoundingClientRect every 250ms is cheap and
+      // correct on every engine. (Tab-hidden needs no handling — the
+      // browser suspends requestAnimationFrame itself.)
+      if (now - this.lastVisCheck > 250) {
+        this.lastVisCheck = now;
+        const r = this.canvas.getBoundingClientRect();
+        this.onScreen =
+          r.width > 0 && r.bottom > 0 && r.top < window.innerHeight;
+      }
+
       // 24fps on low-power devices — the drift is slow enough that the
       // reduced frame rate is invisible, but it cuts canvas work by 60%
       const minGap = this.lowPower ? 41 : 0;
-      if (now - this.lastFrame >= minGap) {
+      if (this.onScreen && now - this.lastFrame >= minGap) {
         this.lastFrame = now;
         this.render(now / 1000);
       }
