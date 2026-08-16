@@ -31,10 +31,19 @@ export function initMotion(): void {
   });
 }
 
-/** True when the visitor asked for reduced motion. Every animation must
- *  check this and render its final state instantly instead (§8). */
+/**
+ * Founder decision (2026-08-16): motion is ALWAYS on. The scroll story is
+ * the product, and the OS-level "reduce motion" setting was silently
+ * switching whole devices to the static variant — which read as the site
+ * being broken. Flip FORCE_MOTION to false to restore the accessibility
+ * guard (every animation already has a static path behind this helper).
+ */
+const FORCE_MOTION = true;
+
+/** True when animations should render their final state instantly. */
 export function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return true;
+  if (FORCE_MOTION) return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
