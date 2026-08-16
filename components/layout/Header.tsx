@@ -40,67 +40,74 @@ export function Header() {
   }, [open]);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300 ${
-        scrolled
-          ? "border-b border-line bg-navy-900/72 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <div className="mx-auto flex h-16 w-full max-w-360 items-center justify-between px-6 md:px-10">
-        <a
-          href="#hero"
-          aria-label="EpiNova — back to top"
-          className="focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
-        >
-          <Logo />
-        </a>
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300 ${
+          open
+            ? "border-b border-line bg-navy-950"
+            : scrolled
+              ? "border-b border-line bg-navy-900/72 backdrop-blur-md"
+              : "border-b border-transparent bg-transparent"
+        }`}
+      >
+        <div className="mx-auto flex h-16 w-full max-w-360 items-center justify-between px-6 md:px-10">
+          <a
+            href="#hero"
+            aria-label="EpiNova — back to top"
+            className="focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+          >
+            <Logo />
+          </a>
 
-        <nav aria-label="Primary" className="hidden md:block">
-          <ul className="flex items-center gap-8">
-            {header.nav.map((item) => (
-              <li key={item.href}>
-                <a
-                  href={item.href}
-                  className="text-sm text-secondary transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+          <nav aria-label="Primary" className="hidden md:block">
+            <ul className="flex items-center gap-8">
+              {header.nav.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="text-sm text-secondary transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        <div className="hidden md:block">
-          <Button href={header.cta.href} variant="solid">
-            {header.cta.label}
-          </Button>
+          <div className="hidden md:block">
+            <Button href={header.cta.href} variant="solid">
+              {header.cta.label}
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex size-11 items-center justify-center text-primary md:hidden"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {/* inline SVGs so the icon paints before hydration */}
+            {open ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path d="M5 5l14 14M19 5L5 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
         </div>
+      </header>
 
-        <button
-          type="button"
-          className="inline-flex size-11 items-center justify-center text-primary md:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {/* inline SVGs so the icon paints before hydration */}
-          {open ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M5 5l14 14M19 5L5 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          )}
-        </button>
-      </div>
-
-      {/* mobile full-screen sheet */}
+      {/* Mobile sheet — a sibling of <header>, never inside it: the header's
+          backdrop-blur makes it a containing block, which would trap this
+          fixed panel inside the 64px bar instead of the viewport. */}
       <div
         id="mobile-nav"
+        aria-hidden={!open}
         className={`fixed inset-0 top-16 z-40 flex flex-col bg-navy-950 transition-opacity duration-300 md:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -111,6 +118,7 @@ export function Header() {
               <li key={item.href}>
                 <a
                   href={item.href}
+                  tabIndex={open ? undefined : -1}
                   onClick={() => setOpen(false)}
                   className="type-h3 block py-5 text-primary"
                 >
@@ -130,6 +138,6 @@ export function Header() {
           </Button>
         </div>
       </div>
-    </header>
+    </>
   );
 }

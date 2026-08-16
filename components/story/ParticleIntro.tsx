@@ -58,6 +58,9 @@ export function ParticleIntro() {
       gsap.set(heroEl, { autoAlpha: 0, y: 24 });
       gsap.set(wordEl, { autoAlpha: 0 });
 
+      const revealHero = () =>
+        gsap.to(heroEl, { autoAlpha: 1, y: 0, duration: 0.7 });
+
       field.init().then(() => {
         if (killed) return;
         field.start();
@@ -72,7 +75,11 @@ export function ParticleIntro() {
             duration: 1.8,
             ease: "power2.inOut",
           })
-          .to(heroEl, { autoAlpha: 1, y: 0, duration: 0.7 }, "-=0.7");
+          .add(revealHero, "-=0.7");
+      })
+      .catch(() => {
+        // never strand the hero copy behind a failed canvas
+        if (!killed) revealHero();
       });
 
       // Act 2 — scrub-linked convergence across the tall wrapper
@@ -143,7 +150,7 @@ export function ParticleIntro() {
   }
 
   return (
-    <section id={hero.id} ref={wrapRef} className="relative h-[300vh]">
+    <section id={hero.id} ref={wrapRef} className="relative h-[220vh] md:h-[300vh]">
       <div className="bg-wash-deep sticky top-0 h-svh overflow-hidden">
         <canvas
           ref={canvasRef}

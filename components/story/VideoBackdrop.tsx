@@ -13,6 +13,33 @@ export interface VideoBackdropProps {
 /** seconds of overlap used to dissolve the loop seam away */
 const CROSSFADE = 1.1;
 
+interface NetworkHint {
+  saveData?: boolean;
+  effectiveType?: string;
+}
+interface NavigatorWithHints extends Navigator {
+  connection?: NetworkHint;
+  deviceMemory?: number;
+}
+
+/**
+ * Phones get the still poster instead of video. Two 720p decodes behind a
+ * scroll-scrubbed scene is the wrong trade on a mid-range Android on
+ * exhibition-hall wifi (CLAUDE.md §3) — and the texture reads the same.
+ */
+function shouldPlayVideo(): boolean {
+  if (prefersReducedMotion()) return false;
+  if (window.matchMedia("(max-width: 900px)").matches) return false;
+  if (window.matchMedia("(pointer: coarse)").matches) return false;
+  const nav = navigator as NavigatorWithHints;
+  if (nav.connection?.saveData) return false;
+  if (nav.connection?.effectiveType && /2g|3g/.test(nav.connection.effectiveType)) {
+    return false;
+  }
+  if (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 2) return false;
+  return true;
+}
+
 /**
  * Dimmed ambient video texture (founder-generated DNA loop). The clip's
  * first and last frames don't match, so a single looping <video> would
@@ -27,13 +54,16 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const aRef = useRef<HTMLVideoElement>(null);
   const bRef = useRef<HTMLVideoElement>(null);
-  const [reduced, setReduced] = useState(false);
+  /** starts true so SSR and phones render the cheap still, never the video */
+  const [still, setStill] = useState(true);
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
-      setReduced(true);
-      return;
-    }
+    if (!shouldPlayVideo()) return;
+    setStill(false);
+  }, []);
+
+  useEffect(() => {
+    if (still) return;
     const wrap = wrapRef.current;
     const a = aRef.current;
     const b = bRef.current;
@@ -44,7 +74,7 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
     let visible = false;
     let swapTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const fail = () => setReduced(true);
+    const fail = () => setStill(true);
 
     // crossfade: when the active copy nears its end, dissolve in the standby
     const onTime = (e: Event) => {
@@ -90,7 +120,7 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
       a.pause();
       b.pause();
     };
-  }, []);
+  }, [still]);
 
   const videoClass =
     "absolute inset-0 h-full w-full object-cover transition-opacity ease-linear duration-1000";
@@ -101,7 +131,7 @@ export function VideoBackdrop({ src, poster, className }: VideoBackdropProps) {
       aria-hidden
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className ?? ""}`}
     >
-      {reduced ? (
+      {still ? (
         // eslint-disable-next-line @next/next/no-img-element -- decorative full-bleed still; next/image adds nothing here
         <img
           src={poster}
