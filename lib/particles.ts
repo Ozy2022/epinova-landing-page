@@ -82,9 +82,14 @@ export class ParticleField {
   private destroyed = false;
   private ro: ResizeObserver | null = null;
   private t0 = 0;
-  /** phones/tablets: DPR 1, fewer particles, 30fps cap */
+  /** phones/tablets: reduced DPR, fewer particles, 24fps cap */
   private lowPower = false;
   private lastFrame = 0;
+  /** how many particles are actually drawn — trimmed if frames run long */
+  private activeCount = 0;
+  /** exponential moving average of render cost, ms */
+  private costEma = 0;
+  private costSamples = 0;
 
   constructor(options: ParticleFieldOptions) {
     this.canvas = options.canvas;
@@ -149,13 +154,26 @@ export class ParticleField {
         sprite: p.sprite,
         size: 1.4 + Math.random() * 2.2,
         phase: Math.random() * Math.PI * 2,
-        speed: 0.35 + Math.random() * 0.5,
-        ampX: 6 + Math.random() * 14,
-        ampY: 5 + Math.random() * 12,
+        // the field must read as alive while idle — below roughly this
+        // speed/amplitude the drift is too slow to perceive as motion
+        speed: 0.5 + Math.random() * 0.7,
+        ampX: 16 + Math.random() * 30,
+        ampY: 13 + Math.random() * 24,
         dDelay: Math.random() * 0.35,
         wDelay: Math.random() * 0.3,
       };
     });
+
+    // shuffle so that drawing only a prefix (adaptive trimming below) still
+    // samples the whole mark evenly instead of lopping off its lower rows
+    for (let i = this.particles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.particles[i], this.particles[j]] = [
+        this.particles[j],
+        this.particles[i],
+      ];
+    }
+    this.activeCount = this.particles.length;
 
     this.buildTraces();
 
@@ -203,8 +221,10 @@ export class ParticleField {
     if (rect.width === 0 || rect.height === 0) return;
     this.lowPower =
       window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900;
+    // glow sprites survive a sub-native buffer; on phones the smaller
+    // texture meaningfully cuts per-frame upload/composite cost
     const dpr = this.lowPower
-      ? 1
+      ? 0.8
       : Math.min(window.devicePixelRatio || 1, 1.5);
     this.cw = rect.width;
     this.ch = rect.height;
@@ -218,10 +238,13 @@ export class ParticleField {
 
   private maxCount(): number {
     const w = window.innerWidth;
-    // density matters here: below ~700 the mark stops reading as the logo
-    if (this.lowPower) return w < 480 ? 750 : 1150;
-    if (w < 1024) return 1700;
-    return 2600;
+    // Cost is dominated by draw-call count, not resolution: every particle
+    // is one drawImage. 2600 measured ~8ms/frame — half the 60fps budget —
+    // so the field is kept dense enough to read the mark, and no denser.
+    // Below ~700 the mark stops reading as the logo.
+    if (this.lowPower) return w < 480 ? 750 : 1000;
+    if (w < 1024) return 1100;
+    return 1500;
   }
 
   private loadImage(src: string): Promise<HTMLImageElement> {
@@ -429,6 +452,7 @@ export class ParticleField {
   private render(t: number): void {
     const ctx = this.ctx;
     if (!ctx || this.cw === 0) return;
+    const started = performance.now();
     const { cw, ch } = this;
     ctx.clearRect(0, 0, cw, ch);
 
@@ -465,7 +489,11 @@ export class ParticleField {
     }
 
     ctx.globalCompositeOperation = "lighter";
-    for (const p of this.particles) {
+    // canvas state changes are not free at this call volume — only reassign
+    // globalAlpha when it actually moves a perceptible amount
+    let lastAlpha = -1;
+    for (let i = 0; i < this.activeCount; i++) {
+      const p = this.particles[i];
       const ed = smooth((d - p.dDelay) / (1 - p.dDelay));
       const ew = smooth((w - p.wDelay) / (1 - p.wDelay));
 
@@ -484,14 +512,41 @@ export class ParticleField {
       const x = baseX + (wordPX - baseX) * ew;
       const y = baseY + (wordPY - baseY) * ew;
 
-      const twinkle = 0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
-      ctx.globalAlpha = Math.min(1, twinkle * (0.55 + 0.45 * ed));
-
       const s = p.size * (1 + 0.25 * ed - 0.2 * ew);
-      const sprite = this.sprites[p.sprite];
-      ctx.drawImage(sprite, x - s, y - s, s * 2, s * 2);
+      // drifted off-screen — skip the draw entirely
+      if (x < -s || x > cw + s || y < -s || y > ch + s) continue;
+
+      const twinkle = 0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
+      const alpha = Math.min(1, twinkle * (0.55 + 0.45 * ed));
+      if (alpha - lastAlpha > 0.03 || lastAlpha - alpha > 0.03) {
+        ctx.globalAlpha = alpha;
+        lastAlpha = alpha;
+      }
+
+      ctx.drawImage(this.sprites[p.sprite], x - s, y - s, s * 2, s * 2);
     }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
+
+    this.tune(performance.now() - started);
+  }
+
+  /**
+   * Self-tuning density. Hardware here ranges from a mid-range Android on
+   * hall wifi to a workstation, so rather than guess a count, watch what
+   * frames actually cost and thin the field until they fit the budget.
+   * Trims only — never grows back — so it settles instead of oscillating.
+   */
+  private tune(cost: number): void {
+    this.costEma = this.costEma === 0 ? cost : this.costEma * 0.9 + cost * 0.1;
+    if (++this.costSamples < 90) return;
+    this.costSamples = 0;
+
+    const budget = this.lowPower ? 7 : 4.5;
+    const floor = this.lowPower ? 420 : 700;
+    if (this.costEma > budget && this.activeCount > floor) {
+      this.activeCount = Math.max(floor, Math.round(this.activeCount * 0.85));
+      this.costEma = 0;
+    }
   }
 }

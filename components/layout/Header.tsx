@@ -39,6 +39,26 @@ export function Header() {
     };
   }, [open]);
 
+  /**
+   * In-sheet links: close the sheet first, then scroll. A plain anchor jump
+   * fires while the sheet still has <html> scroll-locked, so the browser
+   * lands nowhere and the tap looks dead. scrollIntoView() (no explicit
+   * behaviour) defers to the CSS scroll-behaviour, keeping the
+   * reduced-motion override intact.
+   */
+  const goTo =
+    (href: string): React.MouseEventHandler<HTMLAnchorElement> =>
+    (event) => {
+      event.preventDefault();
+      setOpen(false);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          document.querySelector(href)?.scrollIntoView();
+          window.history.replaceState(null, "", href);
+        }),
+      );
+    };
+
   return (
     <>
       <header
@@ -119,7 +139,7 @@ export function Header() {
                 <a
                   href={item.href}
                   tabIndex={open ? undefined : -1}
-                  onClick={() => setOpen(false)}
+                  onClick={goTo(item.href)}
                   className="type-h3 block py-5 text-primary"
                 >
                   {item.label}
@@ -133,6 +153,7 @@ export function Header() {
             href={header.cta.href}
             variant="solid"
             className="w-full"
+            onClick={goTo(header.cta.href)}
           >
             {header.cta.label}
           </Button>

@@ -3,6 +3,7 @@ export interface ButtonProps {
   children: React.ReactNode;
   variant?: "solid" | "outline";
   className?: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
 /**
@@ -14,6 +15,7 @@ export function Button({
   children,
   variant = "solid",
   className,
+  onClick,
 }: ButtonProps) {
   const base =
     "group inline-flex min-h-11 items-center justify-center gap-2 px-6 py-3 text-sm font-medium " +
@@ -29,7 +31,11 @@ export function Button({
   };
 
   return (
-    <a href={href} className={`${base} ${variants[variant]} ${className ?? ""}`}>
+    <a
+      href={href}
+      onClick={onClick}
+      className={`${base} ${variants[variant]} ${className ?? ""}`}
+    >
       {children}
       <span
         aria-hidden

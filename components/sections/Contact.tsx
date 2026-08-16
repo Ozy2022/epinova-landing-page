@@ -80,7 +80,7 @@ export function Contact() {
   };
 
   return (
-    <section id={contact.id} data-strand-node className="relative overflow-hidden border-t border-line bg-navy-950">
+    <section id={contact.id} data-strand-node className="relative scroll-mt-16 overflow-hidden border-t border-line bg-navy-950">
       {/* aurora — teal → deep teal → copper, per §10 */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-45">
         <Aurora stops={["--teal-500", "--teal-600", "--copper-500"]} amplitude={0.8} />
