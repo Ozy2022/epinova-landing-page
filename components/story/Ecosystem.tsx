@@ -49,7 +49,7 @@ export function Ecosystem() {
   }, []);
 
   return (
-    <section id={ecosystem.id} ref={rootRef} className="border-t border-line">
+    <section id={ecosystem.id} ref={rootRef} className="scroll-mt-16 border-t border-line">
       <Container className="py-20 md:py-28">
         <div className="flex flex-col items-center gap-10 text-center">
           <p data-eco-label className="type-label text-tertiary">

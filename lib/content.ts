@@ -20,9 +20,11 @@ export const header = {
   brand: "EPINOVA",
   nav: [
     { label: "The Fusion", href: "#fusion" },
+    { label: "Intelligence", href: "#intelligence" },
     { label: "Data Flow", href: "#flow" },
     { label: "Vision", href: "#vision" },
     { label: "Roadmap", href: "#roadmap" },
+    { label: "Ecosystem", href: "#ecosystem" },
   ] satisfies NavItem[],
   cta: { label: "Meet Us at LEAP", href: "#contact", variant: "solid" } satisfies Cta,
 } as const;
