@@ -61,6 +61,23 @@ export const fusion = {
     "EPINOVA reads the body's earliest molecular signals and interprets them with AI.",
 } as const;
 
+/* small interlude between Fusion and Data Flow */
+export interface ChainItem {
+  label: string;
+  tone: "biology" | "ai" | "human";
+}
+
+export const intelligence = {
+  id: "intelligence",
+  title: "An Intelligence Layer for Precision Diagnostics",
+  body: "EPINOVA transforms molecular biomarker data into AI-powered insights designed to support earlier and more informed cancer detection.",
+  chain: [
+    { label: "Molecular Data", tone: "biology" },
+    { label: "AI Intelligence", tone: "ai" },
+    { label: "Clinical Insight", tone: "human" },
+  ] satisfies ChainItem[],
+} as const;
+
 /* Act 4 — how the data flows. Colour = meaning:
    teal (biology) → cyan (AI) → rose (human health). */
 export interface FlowStage {

@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { ParticleIntro } from "@/components/story/ParticleIntro";
 import { Fusion } from "@/components/story/Fusion";
+import { IntelligenceLayer } from "@/components/story/IntelligenceLayer";
 import { DataFlow } from "@/components/story/DataFlow";
 import { SaudiVision } from "@/components/story/SaudiVision";
 import { Roadmap } from "@/components/story/Roadmap";
@@ -25,6 +26,7 @@ export default function Home() {
       <main>
         <ParticleIntro />
         <Fusion />
+        <IntelligenceLayer />
         <DataFlow />
         <SaudiVision />
         <Roadmap />
