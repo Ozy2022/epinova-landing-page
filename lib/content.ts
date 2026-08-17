@@ -192,5 +192,5 @@ export const footer = {
   descriptor: "Early Detection. Lifelong Protection",
   ctaTitle: "Meet us at LEAP 2026",
   ctaLabel: "Book a meeting",
-  copyright: "© EPINOVA 2026",
+  copyright: "Copyright © 2026 EPINOVA - All Rights Reserved",
 } as const;
