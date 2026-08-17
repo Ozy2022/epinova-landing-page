@@ -50,7 +50,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href={`tel:${contact.details.phone.replace(/\s/g, "")}`}
+                  href={contact.details.phoneHref}
                   className="transition-colors duration-200 hover:text-primary"
                 >
                   {contact.details.phone}

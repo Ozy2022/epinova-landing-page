@@ -219,7 +219,7 @@ export function Contact() {
               {contact.details.email}
             </a>
             <a
-              href={`tel:${contact.details.phone.replace(/\s/g, "")}`}
+              href={contact.details.phoneHref}
               className="p-6 text-sm text-secondary transition-colors duration-200 hover:text-primary"
             >
               <span className="type-label mb-1.5 block text-tertiary">Phone</span>
