@@ -235,6 +235,13 @@ body {
   animation: dot-pulse 2.6s var(--ease) infinite;
 }
 
+/* Fusion signal pathways — tight cyan halo on the travelling pulse bead */
+.signal-pulse {
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--teal-300) 75%, transparent),
+    0 0 20px color-mix(in srgb, var(--teal-400) 40%, transparent);
+}
+
 /* Cyan halo for the fused logo mark (tokens only — no raw hexes) */
 .glow-mark {
   filter: drop-shadow(
