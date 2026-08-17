@@ -77,7 +77,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-line py-6 text-xs text-tertiary">
+        <div className="border-t border-line py-6 text-center text-xs text-tertiary">
           <p>{footer.copyright}</p>
         </div>
       </div>
