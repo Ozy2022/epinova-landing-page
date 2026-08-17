@@ -148,8 +148,6 @@ export function SaudiVision() {
             ))}
           </Reveal>
         </div>
-
-        <p className="mt-16 text-sm text-light-text/45">{vision.footnote}</p>
       </div>
     </Section>
   );
