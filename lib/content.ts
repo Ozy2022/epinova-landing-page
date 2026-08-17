@@ -56,9 +56,9 @@ export const fusion = {
     title: "Intelligence",
     words: ["AI", "Analytics", "Clinical Insights"],
   },
-  statement: "Biology meets Intelligence.",
+  statement: "Biology meets Intelligence",
   substatement:
-    "EPINOVA reads the body's earliest molecular signals and interprets them with AI.",
+    "EPINOVA reads the body's earliest molecular signals and interprets them with AI",
 } as const;
 
 /* small interlude between Fusion and Data Flow */
