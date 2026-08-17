@@ -142,7 +142,7 @@ export const roadmap = {
   stages: [
     {
       title: "Breast Cancer",
-      body: "Our first focus — earlier detection where it matters most.",
+      body: "Starting with breast cancer, we are building toward a broader precision oncology platform",
     },
     {
       title: "Multi-Cancer",
