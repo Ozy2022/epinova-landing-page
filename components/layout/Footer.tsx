@@ -4,8 +4,7 @@ import { contact, footer, header } from "@/lib/content";
 
 /**
  * Operator-style bordered grid: logo + descriptor · nav column · contact
- * column · inline CTA cell, then a bottom row with copyright, illustration
- * credits and privacy link (CLAUDE.md §11).
+ * column · inline CTA cell, then a bottom copyright row.
  */
 export function Footer() {
   return (
@@ -67,7 +66,6 @@ export function Footer() {
                   LinkedIn
                 </a>
               </li>
-              <li className="text-tertiary">{contact.details.booth}</li>
             </ul>
           </div>
 
@@ -79,14 +77,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-line py-6 text-xs text-tertiary md:flex-row md:items-center md:justify-between">
+        <div className="border-t border-line py-6 text-xs text-tertiary">
           <p>{footer.copyright}</p>
-          <a
-            href={footer.privacyHref}
-            className="transition-colors duration-200 hover:text-secondary"
-          >
-            {footer.privacyLabel}
-          </a>
         </div>
       </div>
     </footer>

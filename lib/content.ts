@@ -17,7 +17,7 @@ export interface NavItem {
 }
 
 export const header = {
-  brand: "EpiNova",
+  brand: "EPINOVA",
   nav: [
     { label: "The Fusion", href: "#fusion" },
     { label: "Data Flow", href: "#flow" },
@@ -31,10 +31,10 @@ export const header = {
 export const hero = {
   id: "hero",
   label: "RIYADH, SAUDI ARABIA — PRECISION ONCOLOGY",
-  h1: ["Detect Earlier.", "Understand Deeper."],
-  sub: "AI-powered precision diagnostics for a new era of cancer detection.",
+  h1: ["Detect Earlier", "Understand Deeper"],
+  sub: "A new era of cancer detection through AI",
   ctas: [
-    { label: "Explore EpiNova", href: "#fusion", variant: "solid" },
+    { label: "Explore EPINOVA", href: "#fusion", variant: "solid" },
     { label: "Meet Us at LEAP", href: "#contact", variant: "outline" },
   ] satisfies Cta[],
   /** Act 2 — the wordmark that forms from the merged particles */
@@ -58,7 +58,7 @@ export const fusion = {
   },
   statement: "Biology meets Intelligence.",
   substatement:
-    "EpiNova reads the body's earliest molecular signals and interprets them with AI.",
+    "EPINOVA reads the body's earliest molecular signals and interprets them with AI.",
 } as const;
 
 /* Act 4 — how the data flows. Colour = meaning:
@@ -156,9 +156,9 @@ export const roadmap = {
 } as const;
 
 export const closing = {
-  brand: "EpiNova",
+  brand: "EPINOVA",
   /** reserved for the closing only — the brand signature, not the hero */
-  tagline: "Early Detection. Lifelong Protection.",
+  tagline: "Early Detection. Lifelong Protection",
   cta: "Let's build the future of precision healthcare.",
 } as const;
 
@@ -180,20 +180,17 @@ export const contact = {
     error: "Something went wrong. Please try again or email us directly.",
   },
   details: {
-    email: "k.bametraf@epinova.co",
+    email: "info@epinova.co",
     phone: "+966 55 080 5530",
-    linkedin: "https://www.linkedin.com/company/epinova",
-    booth: "Booth #[TBC] — LEAP 2026",
+    linkedin: "https://www.linkedin.com/company/epinovaco/about/",
+    booth: "Booth H1A.P292 — LEAP 2026",
     qrCaption: "Book a meeting at our LEAP booth",
   },
 } as const;
 
 export const footer = {
-  descriptor:
-    "AI-powered precision diagnostics for a new era of cancer detection.",
-  ctaTitle: "Meet us at LEAP 2026.",
+  descriptor: "Early Detection. Lifelong Protection",
+  ctaTitle: "Meet us at LEAP 2026",
   ctaLabel: "Book a meeting",
-  copyright: "© EpiNova 2026",
-  privacyLabel: "Privacy",
-  privacyHref: "/privacy",
+  copyright: "© EPINOVA 2026",
 } as const;
