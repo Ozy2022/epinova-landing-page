@@ -124,9 +124,6 @@ export const vision = {
     },
   ] satisfies Pillar[],
   mapCaption: "Saudi Arabia → MENA → Global",
-  /** "Aligned with" — never "part of" / "endorsed by". No government logos. */
-  footnote:
-    "Aligned with Saudi Arabia's National Biotechnology Strategy and Vision 2030.",
 } as const;
 
 /* Act 6 — the road ahead + closing */
