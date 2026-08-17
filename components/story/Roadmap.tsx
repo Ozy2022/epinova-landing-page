@@ -86,7 +86,7 @@ export function Roadmap() {
             <li
               key={stage.title}
               data-road-stage
-              className="group relative grid grid-cols-[28px_1fr] gap-6 md:grid-cols-1 md:gap-0"
+              className="group relative grid grid-cols-[28px_1fr] content-start gap-6 md:grid-cols-1 md:gap-0"
             >
               <span
                 aria-hidden
