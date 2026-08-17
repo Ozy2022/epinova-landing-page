@@ -46,22 +46,26 @@ export function DataFlow() {
     const ctx = gsap.context(() => {
       gsap.set(fill, { scaleY: 0, transformOrigin: "top" });
 
-      // line fill scrubbed to scroll; stages light as the fill reaches them
+      // line fill scrubbed to scroll
       ScrollTrigger.create({
         trigger: rail,
         start: "top 72%",
         end: "bottom 45%",
         scrub: 0.6,
-        onUpdate: (self) => {
-          gsap.set(fill, { scaleY: self.progress });
-          const filled = self.progress * rail.offsetHeight;
-          stages.forEach((stage) => {
-            stage.classList.toggle(
-              "is-lit",
-              stage.offsetTop + 14 <= filled + 1,
-            );
-          });
-        },
+        onUpdate: (self) => gsap.set(fill, { scaleY: self.progress }),
+      });
+
+      // Each stage lights on its OWN trigger, not on maths against the
+      // rail's cached height — that version left the last stage dim when
+      // ScrollTrigger's measurements went stale. onEnter also fires on the
+      // initial refresh, so reloading mid-page lights everything above you.
+      stages.forEach((stage) => {
+        ScrollTrigger.create({
+          trigger: stage,
+          start: "top 62%",
+          onEnter: () => stage.classList.add("is-lit"),
+          onLeaveBack: () => stage.classList.remove("is-lit"),
+        });
       });
 
       // streaming particles: teal → cyan → rose along the line
