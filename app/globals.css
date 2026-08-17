@@ -179,6 +179,23 @@ body {
 }
 /* no reduced-motion override: motion is forced on site-wide (lib/motion.ts) */
 
+/* The crisp EPINOVA that materialises out of the particle wordmark */
+.brand-reveal {
+  background-image: linear-gradient(
+    100deg,
+    var(--teal-300) 0%,
+    var(--text-primary) 30%,
+    var(--text-primary) 70%,
+    var(--copper-300) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(
+    0 0 26px color-mix(in srgb, var(--teal-400) 28%, transparent)
+  );
+}
+
 /* Hero scroll cue — a quiet bobbing chevron under the assembled logo */
 @keyframes hint-bob {
   0%,
