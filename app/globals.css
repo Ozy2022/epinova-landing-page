@@ -179,6 +179,22 @@ body {
 }
 /* no reduced-motion override: motion is forced on site-wide (lib/motion.ts) */
 
+/* Hero scroll cue — a quiet bobbing chevron under the assembled logo */
+@keyframes hint-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+}
+.scroll-hint {
+  animation: hint-bob 1.9s var(--ease) infinite;
+}
+
 /* Ecosystem strip — a soft light sweep travelling across each big word */
 @keyframes text-shine {
   0% {
