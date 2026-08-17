@@ -76,9 +76,6 @@ export class ParticleField {
   disperse = 0;
   /** 0 = field · 1 = formed wordmark (scroll-scrubbed) */
   converge = 0;
-  /** 0→1 as the crisp typeset wordmark takes over — word particles dim
-   *  to sparkle so the real type carries the name */
-  crisp = 0;
 
   private cw = 0;
   private ch = 0;
@@ -190,7 +187,7 @@ export class ParticleField {
     // forms, so the brand name reads dense and clearly visual without
     // raising the cost of the logo or idle-field phases. Appended after
     // the shuffle so adaptive trimming sheds these first on weak devices.
-    const boost = this.lowPower ? 700 : 1400;
+    const boost = this.lowPower ? 1200 : 2600;
     for (let i = 0; i < boost; i++) {
       const w = wordPts[Math.floor(Math.random() * wordPts.length)] ?? {
         x: 0.5,
@@ -568,7 +565,7 @@ export class ParticleField {
         const by = bfy + (wordY + p.wy * wordH - bfy) * ew;
         const bTwinkle =
           0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
-        const ba = (0.7 + 0.3 * bTwinkle) * ew * (1 - 0.72 * this.crisp);
+        const ba = (0.7 + 0.3 * bTwinkle) * ew;
         if (ba - lastAlpha > 0.03 || lastAlpha - ba > 0.03) {
           ctx.globalAlpha = ba;
           lastAlpha = ba;
@@ -604,9 +601,7 @@ export class ParticleField {
       // then near-solid again in the wordmark so the name reads clearly
       const idle = Math.min(1, twinkle * (0.55 + 0.45 * ed));
       const dispersed = idle + (0.97 - idle) * (1 - sd);
-      const converged = dispersed + (0.7 + 0.3 * twinkle - dispersed) * ew;
-      // once the crisp type takes over, particles recede to sparkle
-      const alpha = converged * (1 - 0.72 * this.crisp * ew);
+      const alpha = dispersed + (0.7 + 0.3 * twinkle - dispersed) * ew;
       if (alpha - lastAlpha > 0.03 || lastAlpha - alpha > 0.03) {
         ctx.globalAlpha = alpha;
         lastAlpha = alpha;
@@ -627,6 +622,13 @@ export class ParticleField {
    * Trims only — never grows back — so it settles instead of oscillating.
    */
   private tune(cost: number): void {
+    // never tune while the wordmark holds: that scene is a still frame
+    // with nothing else running, and its density IS the brand moment
+    if (this.converge > 0.4) {
+      this.costEma = 0;
+      this.costSamples = 0;
+      return;
+    }
     this.costEma = this.costEma === 0 ? cost : this.costEma * 0.9 + cost * 0.1;
     if (++this.costSamples < 90) return;
     this.costSamples = 0;

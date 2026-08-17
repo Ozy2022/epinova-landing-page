@@ -22,7 +22,6 @@ export function ParticleIntro() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const wordRef = useRef<HTMLDivElement>(null);
-  const crispRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
   const [reduced, setReduced] = useState(false);
@@ -38,11 +37,9 @@ export function ParticleIntro() {
     const canvas = canvasRef.current;
     const heroEl = heroRef.current;
     const wordEl = wordRef.current;
-    const crispEl = crispRef.current;
     const logoEl = logoRef.current;
     const hintEl = hintRef.current;
-    if (!wrap || !canvas || !heroEl || !wordEl || !crispEl || !logoEl || !hintEl)
-      return;
+    if (!wrap || !canvas || !heroEl || !wordEl || !logoEl || !hintEl) return;
 
     const field = new ParticleField({
       canvas,
@@ -57,7 +54,6 @@ export function ParticleIntro() {
       // the copy waits for the visitor's scroll; the logo owns the open
       gsap.set(heroEl, { autoAlpha: 0, y: 24 });
       gsap.set(wordEl, { autoAlpha: 0 });
-      gsap.set(crispEl, { autoAlpha: 0 });
 
       const revealHero = () => {
         fallback = true;
@@ -115,16 +111,6 @@ export function ParticleIntro() {
 
           gsap.set(wordEl, {
             autoAlpha: clamp01(gsap.utils.normalize(0.84, 0.97, p)),
-          });
-
-          // finale: the crisp typeset name materialises out of the
-          // particles, which recede to sparkle around it
-          const crisp = clamp01(gsap.utils.normalize(0.88, 0.985, p));
-          field.crisp = crisp;
-          gsap.set(crispEl, {
-            autoAlpha: crisp,
-            scale: 1.04 - 0.04 * crisp,
-            filter: `blur(${(1 - crisp) * 10}px)`,
           });
         },
       });
@@ -241,21 +227,7 @@ export function ParticleIntro() {
           </div>
         </div>
 
-        {/* Act 2 finale — the crisp typeset name the particles become */}
-        <div
-          ref={crispRef}
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 text-center"
-        >
-          <p
-            translate="no"
-            className="brand-reveal font-display text-[min(18.9vw,202px)] font-bold leading-none tracking-[0.01em]"
-          >
-            {hero.convergence.wordmark}
-          </p>
-        </div>
-
-        {/* …and the subline beneath the assembled letters */}
+        {/* the subline beneath the particle-formed letters */}
         <div
           ref={wordRef}
           aria-hidden
