@@ -130,7 +130,7 @@ export function IntelligenceLayer() {
     <section
       id={intelligence.id}
       ref={rootRef}
-      className="border-t border-line"
+      className="scroll-mt-16 border-t border-line"
     >
       <Container className="py-20 md:py-28">
         <div className="flex flex-col items-center text-center">

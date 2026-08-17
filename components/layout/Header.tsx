@@ -79,8 +79,10 @@ export function Header() {
             <Logo />
           </a>
 
-          <nav aria-label="Primary" className="hidden md:block">
-            <ul className="flex items-center gap-8">
+          {/* six items no longer fit beside logo + CTA at 768px — inline nav
+              starts at lg; tablets use the sheet */}
+          <nav aria-label="Primary" className="hidden lg:block">
+            <ul className="flex items-center gap-6 xl:gap-8">
               {header.nav.map((item) => (
                 <li key={item.href}>
                   <a
@@ -94,7 +96,7 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <Button href={header.cta.href} variant="solid">
               {header.cta.label}
             </Button>
@@ -102,7 +104,7 @@ export function Header() {
 
           <button
             type="button"
-            className="inline-flex size-11 items-center justify-center text-primary md:hidden"
+            className="inline-flex size-11 items-center justify-center text-primary lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -128,7 +130,7 @@ export function Header() {
       <div
         id="mobile-nav"
         aria-hidden={!open}
-        className={`fixed inset-0 top-16 z-40 flex flex-col bg-navy-950 transition-opacity duration-300 md:hidden ${
+        className={`fixed inset-0 top-16 z-40 flex flex-col bg-navy-950 transition-opacity duration-300 lg:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
