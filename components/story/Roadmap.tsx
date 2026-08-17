@@ -44,13 +44,19 @@ export function Roadmap() {
           const p = self.progress;
           if (horizontal()) gsap.set(fill, { scaleX: p, scaleY: 1 });
           else gsap.set(fill, { scaleX: 1, scaleY: p });
-          stages.forEach((stage, i) => {
-            stage.classList.toggle(
-              "is-lit",
-              p >= (i + 0.35) / stages.length,
-            );
-          });
         },
+      });
+
+      // per-stage triggers (same fix as DataFlow): index-staggered starts
+      // keep the left-to-right sequence in the horizontal desktop layout,
+      // where all three stages share the same top edge
+      stages.forEach((stage, i) => {
+        ScrollTrigger.create({
+          trigger: stage,
+          start: `top ${78 - i * 9}%`,
+          onEnter: () => stage.classList.add("is-lit"),
+          onLeaveBack: () => stage.classList.remove("is-lit"),
+        });
       });
     }, rail);
 
