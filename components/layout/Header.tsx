@@ -73,7 +73,7 @@ export function Header() {
         <div className="mx-auto flex h-16 w-full max-w-360 items-center justify-between px-6 md:px-10">
           <a
             href="#hero"
-            aria-label="EpiNova — back to top"
+            aria-label="EPINOVA — back to top"
             className="focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
           >
             <Logo />

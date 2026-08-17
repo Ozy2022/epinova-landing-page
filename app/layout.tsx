@@ -12,15 +12,15 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://epinova.co"),
-  title: "EpiNova — AI-Powered Early Breast Cancer Detection",
+  title: "EPINOVA — A New Era of Cancer Detection Through AI",
   description:
-    "AI-powered precision diagnostics using DNA methylation biomarkers for a new era of early breast cancer detection. Riyadh, Saudi Arabia.",
+    "A new era of cancer detection through AI. Precision diagnostics using DNA methylation biomarkers. Riyadh, Saudi Arabia.",
   openGraph: {
-    title: "EpiNova — Detect Earlier. Understand Deeper.",
+    title: "EPINOVA — Detect Earlier, Understand Deeper",
     description:
-      "AI-powered precision diagnostics using DNA methylation biomarkers for early breast cancer detection.",
+      "A new era of cancer detection through AI. Precision diagnostics using DNA methylation biomarkers.",
     url: "https://epinova.co",
-    siteName: "EpiNova",
+    siteName: "EPINOVA",
     locale: "en_US",
     type: "website",
   },
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050F17",
+  themeColor: "#071A2A",
 };
 
 export default function RootLayout({

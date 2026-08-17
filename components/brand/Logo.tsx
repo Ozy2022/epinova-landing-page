@@ -8,7 +8,7 @@ export interface LogoProps {
 }
 
 /**
- * Header lockup: official helix mark + "EpiNova" set live in Cabinet Grotesk.
+ * Header lockup: official helix mark + "EPINOVA" set live in Cabinet Grotesk.
  * The raster wordmark is navy and fails contrast on dark surfaces, so the
  * name is typeset in --text-primary instead (CLAUDE.md §10).
  */

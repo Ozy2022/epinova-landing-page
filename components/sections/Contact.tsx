@@ -59,7 +59,7 @@ export function Contact() {
       const body = encodeURIComponent(
         `${values.message}\n\n— ${values.name}, ${values.role}, ${values.organisation} (${values.email})`,
       );
-      window.location.href = `mailto:${contact.details.email}?subject=EpiNova enquiry&body=${body}`;
+      window.location.href = `mailto:${contact.details.email}?subject=EPINOVA enquiry&body=${body}`;
       setStatus("success");
       return;
     }
@@ -248,7 +248,7 @@ export function Contact() {
               className="p-6 text-sm text-secondary transition-colors duration-200 hover:text-primary"
             >
               <span className="type-label mb-1.5 block text-tertiary">LinkedIn</span>
-              EpiNova
+              EPINOVA
             </a>
             <div className="p-6 text-sm text-secondary">
               <span className="type-label mb-1.5 block text-tertiary">LEAP 2026</span>
