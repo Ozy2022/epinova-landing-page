@@ -141,6 +141,7 @@ export const vision = {
     },
   ] satisfies Pillar[],
   mapCaption: "Saudi Arabia → MENA → Global",
+  mapOrigin: "Riyadh",
 } as const;
 
 /* Act 6 — the road ahead + closing */
