@@ -66,25 +66,26 @@ export function IntelligenceLayer() {
         )
         .from(links, { autoAlpha: 0, duration: 0.4, stagger: 0.14 }, "-=0.55");
 
-      // continuous cascade — a light pulse travelling card → link → card
-      const cascade = gsap.timeline({ repeat: -1, repeatDelay: 1.3, paused: true });
+      // continuous cascade — a light pulse travelling card → link → card,
+      // deliberately unhurried (founder: the faster version felt rushed)
+      const cascade = gsap.timeline({ repeat: -1, repeatDelay: 2.2, paused: true });
       steps.forEach((step, i) => {
-        const at = i * 0.85;
+        const at = i * 1.5;
         cascade
           .to(
             step,
             {
               scale: 1.05,
               filter: "drop-shadow(0 0 16px currentColor)",
-              duration: 0.35,
+              duration: 0.6,
               ease: "power2.out",
             },
             at,
           )
           .to(
             step,
-            { scale: 1, filter: "drop-shadow(0 0 0px transparent)", duration: 0.55 },
-            at + 0.4,
+            { scale: 1, filter: "drop-shadow(0 0 0px transparent)", duration: 0.9 },
+            at + 0.7,
           );
 
         const link = links[i];
@@ -103,10 +104,10 @@ export function IntelligenceLayer() {
                 ...(wide ? { left: "96%" } : { top: "96%" }),
                 backgroundColor: css(to),
                 keyframes: { autoAlpha: [0, 1, 1, 0] },
-                duration: 0.6,
+                duration: 1.1,
                 ease: "power1.inOut",
               },
-              at + 0.35,
+              at + 0.55,
             );
           }
         }
