@@ -177,7 +177,10 @@ export const contact = {
   },
   details: {
     email: "info@epinova.co",
-    phone: "+966 55 080 5530",
+    /** displayed without the + per founder; the tel: link keeps +966 so
+     *  tapping still dials correctly from abroad */
+    phone: "966 55 080 5530",
+    phoneHref: "tel:+966550805530",
     linkedin: "https://www.linkedin.com/company/epinovaco/about/",
     booth: "Booth H1A.P292 — LEAP 2026",
     qrCaption: "Book a meeting at our LEAP booth",
