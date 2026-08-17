@@ -12,9 +12,8 @@ import { closing, contact } from "@/lib/content";
 const schema = z.object({
   name: z.string().min(2, "Please enter your name"),
   email: z.email("Please enter a valid work email"),
-  organisation: z.string().min(2, "Please enter your organisation"),
+  organisation: z.string().min(2, "Please enter your organization"),
   role: z.enum(contact.form.roles),
-  message: z.string().min(10, "Please add a short message"),
   /** honeypot — must stay empty */
   company_website: z.string().max(0).optional().or(z.literal("")),
 });
@@ -57,9 +56,11 @@ export function Contact() {
     if (!endpoint) {
       // graceful fallback: hand off to the visitor's mail client
       const body = encodeURIComponent(
-        `${values.message}\n\n— ${values.name}, ${values.role}, ${values.organisation} (${values.email})`,
+        `${values.name} — ${values.role}\n${values.organisation}\n${values.email}`,
       );
-      window.location.href = `mailto:${contact.details.email}?subject=EPINOVA enquiry&body=${body}`;
+      window.location.href = `mailto:${contact.details.email}?subject=${encodeURIComponent(
+        "EPINOVA — meeting request",
+      )}&body=${body}`;
       setStatus("success");
       return;
     }
@@ -156,7 +157,7 @@ export function Contact() {
                 />
                 {errors.organisation && (
                   <p role="alert" className="mt-1.5 text-xs text-copper-400">
-                    Please enter your organisation
+                    Please enter your organization
                   </p>
                 )}
               </div>
@@ -173,23 +174,6 @@ export function Contact() {
                 </select>
               </div>
             </div>
-            <div>
-              <label htmlFor="message" className="type-label mb-2 block text-tertiary">
-                {contact.form.fields.message}
-              </label>
-              <textarea
-                id="message"
-                rows={5}
-                className={inputClass}
-                {...register("message", { required: true, minLength: 10 })}
-              />
-              {errors.message && (
-                <p role="alert" className="mt-1.5 text-xs text-copper-400">
-                  Please add a short message
-                </p>
-              )}
-            </div>
-
             {/* honeypot — visually hidden but present for bots */}
             <div className="sr-only" aria-hidden>
               <label htmlFor="company_website">Company website</label>
