@@ -73,26 +73,26 @@ export interface FlowStage {
 export const flow = {
   id: "flow",
   label: "02 — HOW THE DATA FLOWS",
-  h2: "From Sample to Certainty",
+  h2: "From Sample to Insight",
   stages: [
     {
       title: "Biological Data",
-      body: "A simple blood sample carries the body's molecular story.",
+      body: "Biological samples carry molecular signals that can reveal meaningful changes.",
       tone: "biology",
     },
     {
       title: "Molecular Signals",
-      body: "Epigenetic patterns surface the earliest signs of change.",
+      body: "Epigenetic patterns reveal molecular changes that can support earlier detection.",
       tone: "biology",
     },
     {
       title: "AI Analysis",
-      body: "Models read the signals and separate meaning from noise.",
+      body: "AI models interpret molecular signals, separating meaningful patterns from noise.",
       tone: "ai",
     },
     {
-      title: "Clinically Actionable Insights",
-      body: "A clear result clinicians can act on — earlier.",
+      title: "Actionable Insights",
+      body: "Actionable insights designed to support earlier, more informed clinical decisions.",
       tone: "human",
     },
   ] satisfies FlowStage[],
