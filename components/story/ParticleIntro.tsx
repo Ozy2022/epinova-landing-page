@@ -204,10 +204,12 @@ export function ParticleIntro() {
           </div>
         </div>
 
-        {/* Act 1½ — hero copy over the quiet particle field */}
+        {/* Act 1½ — hero copy over the quiet particle field. Hidden in the
+            server HTML (invisible/opacity-0) so the first paint shows only
+            the logo — GSAP's inline styles take over after hydration. */}
         <div
           ref={heroRef}
-          className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
+          className="invisible relative z-10 flex h-full flex-col items-center justify-center px-6 text-center opacity-0"
         >
           <MonoLabel text={hero.label} className="mb-6" />
           <h1 className="type-display-xl">
@@ -227,11 +229,12 @@ export function ParticleIntro() {
           </div>
         </div>
 
-        {/* the subline beneath the particle-formed letters */}
+        {/* the subline beneath the particle-formed letters — also hidden in
+            the server HTML to avoid the pre-hydration flash */}
         <div
           ref={wordRef}
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-[63%] z-10 px-6 text-center"
+          className="invisible pointer-events-none absolute inset-x-0 top-[63%] z-10 px-6 text-center opacity-0"
         >
           <p className="type-body-lg text-secondary">
             {hero.convergence.line}
