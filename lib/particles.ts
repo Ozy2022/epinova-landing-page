@@ -76,6 +76,9 @@ export class ParticleField {
   disperse = 0;
   /** 0 = field · 1 = formed wordmark (scroll-scrubbed) */
   converge = 0;
+  /** 0→1 as the crisp typeset wordmark takes over — word particles dim
+   *  to sparkle so the real type carries the name */
+  crisp = 0;
 
   private cw = 0;
   private ch = 0;
@@ -565,7 +568,7 @@ export class ParticleField {
         const by = bfy + (wordY + p.wy * wordH - bfy) * ew;
         const bTwinkle =
           0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
-        const ba = (0.7 + 0.3 * bTwinkle) * ew;
+        const ba = (0.7 + 0.3 * bTwinkle) * ew * (1 - 0.72 * this.crisp);
         if (ba - lastAlpha > 0.03 || lastAlpha - ba > 0.03) {
           ctx.globalAlpha = ba;
           lastAlpha = ba;
@@ -601,7 +604,9 @@ export class ParticleField {
       // then near-solid again in the wordmark so the name reads clearly
       const idle = Math.min(1, twinkle * (0.55 + 0.45 * ed));
       const dispersed = idle + (0.97 - idle) * (1 - sd);
-      const alpha = dispersed + (0.7 + 0.3 * twinkle - dispersed) * ew;
+      const converged = dispersed + (0.7 + 0.3 * twinkle - dispersed) * ew;
+      // once the crisp type takes over, particles recede to sparkle
+      const alpha = converged * (1 - 0.72 * this.crisp * ew);
       if (alpha - lastAlpha > 0.03 || lastAlpha - alpha > 0.03) {
         ctx.globalAlpha = alpha;
         lastAlpha = alpha;
