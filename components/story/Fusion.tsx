@@ -80,8 +80,16 @@ export function Fusion() {
         // …then flow into each other
         .to(lefts, { xPercent: 26, autoAlpha: 0, duration: 0.3 }, 0.52)
         .to(rights, { xPercent: -26, autoAlpha: 0, duration: 0.3 }, 0.52)
-        // …and fuse into the mark
-        .from(mark, { scale: 0.7, autoAlpha: 0, duration: 0.3 }, 0.58);
+        // …and fuse into the mark. fromTo with an explicit end state: the
+        // element ships hidden in the server HTML (invisible/opacity-0) to
+        // avoid the pre-hydration flash, so a .from would read 0 as its
+        // target and the mark would never appear.
+        .fromTo(
+          mark,
+          { scale: 0.7, autoAlpha: 0 },
+          { scale: 1, autoAlpha: 1, duration: 0.3 },
+          0.58,
+        );
 
       // the pathways live: a brighter pulse travels each line in sequence —
       // DNA → AI, then Biomarkers → Analytics, then Molecular Signals →
@@ -282,7 +290,7 @@ export function Fusion() {
         {rows}
         <div
           ref={markRef}
-          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
+          className="invisible pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center opacity-0"
         >
           <Image
             src="/brand/logo-mark.png"
