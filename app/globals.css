@@ -157,34 +157,7 @@ body {
   box-shadow: 0 0 32px color-mix(in srgb, var(--teal-400) 16%, transparent);
 }
 
-/* Riyadh origin pulse on the Act-5 map */
-@keyframes map-pulse {
-  0% {
-    transform: scale(0.4);
-    opacity: 0.75;
-  }
-  80% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-}
-.map-pulse {
-  animation: map-pulse 2.8s var(--ease) infinite;
-  transform-origin: center;
-  transform-box: fill-box;
-}
-/* second ring, offset half a cycle for a fuller double pulse */
-.map-pulse-late {
-  animation: map-pulse 2.8s var(--ease) 1.4s infinite;
-  transform-origin: center;
-  transform-box: fill-box;
-  opacity: 0; /* invisible until the delayed animation begins */
-}
-/* no reduced-motion override: motion is forced on site-wide (lib/motion.ts) */
+/* (the Act-5 map draws its own pulses on canvas — see VisionMap.tsx) */
 
 /* Hero scroll cue — a quiet bobbing chevron under the assembled logo */
 @keyframes hint-bob {
