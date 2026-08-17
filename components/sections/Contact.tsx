@@ -22,6 +22,21 @@ type FormValues = z.infer<typeof schema>;
 
 type Status = "idle" | "sending" | "success" | "error";
 
+/**
+ * Google Form wiring (preferred backend): the on-site form posts straight
+ * into a Google Form, whose linked Sheet is the submissions dashboard.
+ * All five vars must be set; the entry.* IDs come from the form's
+ * "Get pre-filled link" URL. NEXT_PUBLIC_* values are inlined at build
+ * time, so changing them in Vercel requires a redeploy.
+ */
+const GFORM = {
+  action: process.env.NEXT_PUBLIC_GFORM_ACTION,
+  entryName: process.env.NEXT_PUBLIC_GFORM_ENTRY_NAME,
+  entryEmail: process.env.NEXT_PUBLIC_GFORM_ENTRY_EMAIL,
+  entryOrg: process.env.NEXT_PUBLIC_GFORM_ENTRY_ORG,
+  entryRole: process.env.NEXT_PUBLIC_GFORM_ENTRY_ROLE,
+};
+
 const inputClass =
   "w-full rounded border border-line bg-glass px-4 py-3 text-sm text-primary placeholder:text-tertiary " +
   "backdrop-blur-md transition-colors duration-200 focus:border-teal-500 focus:outline-none";
@@ -48,6 +63,32 @@ export function Contact() {
       if (values.company_website) {
         setStatus("success");
         return;
+      }
+      return;
+    }
+
+    const { action, entryName, entryEmail, entryOrg, entryRole } = GFORM;
+    if (action && entryName && entryEmail && entryOrg && entryRole) {
+      setStatus("sending");
+      try {
+        // Google doesn't send CORS headers, so the response is opaque
+        // (no-cors): a resolved fetch is the success signal — network
+        // failures still throw into the catch.
+        await fetch(action, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            [entryName]: values.name,
+            [entryEmail]: values.email,
+            [entryOrg]: values.organisation,
+            [entryRole]: values.role,
+          }).toString(),
+        });
+        setStatus("success");
+        reset();
+      } catch {
+        setStatus("error");
       }
       return;
     }
