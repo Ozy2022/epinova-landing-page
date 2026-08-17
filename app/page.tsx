@@ -6,6 +6,7 @@ import { Fusion } from "@/components/story/Fusion";
 import { DataFlow } from "@/components/story/DataFlow";
 import { SaudiVision } from "@/components/story/SaudiVision";
 import { Roadmap } from "@/components/story/Roadmap";
+import { Ecosystem } from "@/components/story/Ecosystem";
 import { Contact } from "@/components/sections/Contact";
 import { MotionDebug } from "@/components/dev/MotionDebug";
 
@@ -27,6 +28,7 @@ export default function Home() {
         <DataFlow />
         <SaudiVision />
         <Roadmap />
+        <Ecosystem />
         <Contact />
       </main>
 

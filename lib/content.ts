@@ -152,6 +152,13 @@ export const roadmap = {
   ] satisfies RoadStage[],
 } as const;
 
+/* compact strip after the roadmap — three big words, no long explanation */
+export const ecosystem = {
+  id: "ecosystem",
+  title: "Built for the Healthcare Ecosystem",
+  items: ["Hospitals", "Diagnostic Labs", "Research Centers"],
+} as const;
+
 export const closing = {
   brand: "EPINOVA",
   /** reserved for the closing only — the brand signature, not the hero */
