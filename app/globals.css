@@ -179,6 +179,46 @@ body {
 }
 /* no reduced-motion override: motion is forced on site-wide (lib/motion.ts) */
 
+/* Ecosystem strip — a soft light sweep travelling across each big word */
+@keyframes text-shine {
+  0% {
+    background-position: 130% 0;
+  }
+  100% {
+    background-position: -130% 0;
+  }
+}
+.shine-text {
+  background-image: linear-gradient(
+    105deg,
+    var(--text-primary) 42%,
+    var(--teal-300) 50%,
+    var(--text-primary) 58%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-shine 6s linear infinite;
+}
+
+/* separator dots breathe quietly */
+@keyframes dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+.dot-pulse {
+  animation: dot-pulse 2.6s var(--ease) infinite;
+}
+
 /* Cyan halo for the fused logo mark (tokens only — no raw hexes) */
 .glow-mark {
   filter: drop-shadow(
