@@ -480,12 +480,14 @@ export class ParticleField {
     const d = this.disperse;
     const w = this.converge;
 
-    // logo box — centred, slightly above middle, with a slow breathing
-    // sway so the assembled pose clearly reads as alive, never frozen
+    // logo box — centred, slightly above middle. The sway is gated by the
+    // dissolve so the assembled pose stays perfectly registered under the
+    // crisp DOM logo shown at page load; it comes alive as it breaks apart.
+    const sd = smooth(d);
     const logoH = Math.min(ch * 0.42, 400);
     const logoW = logoH * this.logoAspect;
-    const logoX = (cw - logoW) / 2 + Math.sin(t * 0.6) * 5;
-    const logoY = ch * 0.46 - logoH / 2 + Math.sin(t * 0.9 + 1.3) * 7;
+    const logoX = (cw - logoW) / 2 + Math.sin(t * 0.6) * 5 * sd;
+    const logoY = ch * 0.46 - logoH / 2 + Math.sin(t * 0.9 + 1.3) * 7 * sd;
 
     // wordmark box — centred
     const wordW = Math.min(cw * 0.86, 920);
@@ -541,7 +543,9 @@ export class ParticleField {
       if (x < -s || x > cw + s || y < -s || y > ch + s) continue;
 
       const twinkle = 0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
-      const alpha = Math.min(1, twinkle * (0.55 + 0.45 * ed));
+      // near-solid while assembled (a clear logo), twinkling once dispersed
+      const idle = Math.min(1, twinkle * (0.55 + 0.45 * ed));
+      const alpha = idle + (0.97 - idle) * (1 - sd);
       if (alpha - lastAlpha > 0.03 || lastAlpha - alpha > 0.03) {
         ctx.globalAlpha = alpha;
         lastAlpha = alpha;
