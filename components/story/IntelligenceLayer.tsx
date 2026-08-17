@@ -67,8 +67,10 @@ export function IntelligenceLayer() {
         .from(links, { autoAlpha: 0, duration: 0.4, stagger: 0.14 }, "-=0.55");
 
       // continuous cascade — a light pulse travelling card → link → card,
-      // deliberately unhurried (founder: the faster version felt rushed)
-      const cascade = gsap.timeline({ repeat: -1, repeatDelay: 2.2, paused: true });
+      // deliberately unhurried (founder: the faster version felt rushed).
+      // The long rest matters most: the eye needs a real pause after the
+      // rose glow fades before the cycle returns to Molecular Data.
+      const cascade = gsap.timeline({ repeat: -1, repeatDelay: 4, paused: true });
       steps.forEach((step, i) => {
         const at = i * 1.5;
         cascade
