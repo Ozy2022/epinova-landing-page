@@ -28,6 +28,8 @@ interface Particle {
   /** per-particle stagger for the dissolve / convergence */
   dDelay: number;
   wDelay: number;
+  /** word-boost particles exist only in the converged wordmark */
+  wordOnly?: boolean;
 }
 
 interface Trace {
@@ -180,6 +182,37 @@ export class ParticleField {
         this.particles[i],
       ];
     }
+
+    // word-boost pool: extra particles that appear ONLY as the wordmark
+    // forms, so the brand name reads dense and clearly visual without
+    // raising the cost of the logo or idle-field phases. Appended after
+    // the shuffle so adaptive trimming sheds these first on weak devices.
+    const boost = this.lowPower ? 700 : 1400;
+    for (let i = 0; i < boost; i++) {
+      const w = wordPts[Math.floor(Math.random() * wordPts.length)] ?? {
+        x: 0.5,
+        y: 0.5,
+      };
+      const roll = Math.random();
+      this.particles.push({
+        hx: 0.5,
+        hy: 0.5,
+        sx: 0.04 + Math.random() * 0.92,
+        sy: 0.06 + Math.random() * 0.88,
+        wx: w.x,
+        wy: w.y,
+        sprite: roll < 0.5 ? 0 : roll < 0.72 ? 1 : roll < 0.85 ? 2 : roll < 0.93 ? 3 : 4,
+        size: 1.3 + Math.random() * 2,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 0.7,
+        ampX: 10 + Math.random() * 16,
+        ampY: 8 + Math.random() * 14,
+        dDelay: 0,
+        wDelay: Math.random() * 0.3,
+        wordOnly: true,
+      });
+    }
+
     this.activeCount = this.particles.length;
 
     this.buildTraces();
@@ -422,7 +455,7 @@ export class ParticleField {
 
     const data = g.getImageData(0, 0, W, H).data;
     const pts: Array<{ x: number; y: number }> = [];
-    const step = 3;
+    const step = 2; // dense sampling — the brand name must read clearly
     let minX = W;
     let maxX = 0;
     let minY = H;
@@ -521,6 +554,27 @@ export class ParticleField {
       const ed = smooth((d - p.dDelay) / (1 - p.dDelay));
       const ew = smooth((w - p.wDelay) / (1 - p.wDelay));
 
+      // word-boost particles: skipped entirely until the wordmark forms
+      if (p.wordOnly) {
+        if (ew < 0.03) continue;
+        const bDriftX = Math.sin(t * p.speed + p.phase) * p.ampX;
+        const bDriftY = Math.cos(t * p.speed * 0.8 + p.phase) * p.ampY;
+        const bfx = p.sx * cw + bDriftX;
+        const bfy = p.sy * ch + bDriftY;
+        const bx = bfx + (wordX + p.wx * wordW - bfx) * ew;
+        const by = bfy + (wordY + p.wy * wordH - bfy) * ew;
+        const bTwinkle =
+          0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
+        const ba = (0.7 + 0.3 * bTwinkle) * ew;
+        if (ba - lastAlpha > 0.03 || lastAlpha - ba > 0.03) {
+          ctx.globalAlpha = ba;
+          lastAlpha = ba;
+        }
+        const bs = p.size;
+        ctx.drawImage(this.sprites[p.sprite], bx - bs, by - bs, bs * 2, bs * 2);
+        continue;
+      }
+
       const driftX = Math.sin(t * p.speed + p.phase) * p.ampX;
       const driftY = Math.cos(t * p.speed * 0.8 + p.phase) * p.ampY;
 
@@ -538,14 +592,16 @@ export class ParticleField {
       const x = baseX + (wordPX - baseX) * ew + settle;
       const y = baseY + (wordPY - baseY) * ew - settle * 0.6;
 
-      const s = p.size * (1 + 0.25 * ed - 0.2 * ew);
+      const s = p.size * (1 + 0.25 * ed - 0.05 * ew);
       // drifted off-screen — skip the draw entirely
       if (x < -s || x > cw + s || y < -s || y > ch + s) continue;
 
       const twinkle = 0.65 + 0.35 * Math.sin(t * p.speed * 0.9 + p.phase * 2);
-      // near-solid while assembled (a clear logo), twinkling once dispersed
+      // near-solid while assembled (a clear logo), twinkling once dispersed,
+      // then near-solid again in the wordmark so the name reads clearly
       const idle = Math.min(1, twinkle * (0.55 + 0.45 * ed));
-      const alpha = idle + (0.97 - idle) * (1 - sd);
+      const dispersed = idle + (0.97 - idle) * (1 - sd);
+      const alpha = dispersed + (0.7 + 0.3 * twinkle - dispersed) * ew;
       if (alpha - lastAlpha > 0.03 || lastAlpha - alpha > 0.03) {
         ctx.globalAlpha = alpha;
         lastAlpha = alpha;
